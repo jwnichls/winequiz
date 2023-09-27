@@ -1,0 +1,40 @@
+{% extends "bootstrap/base.html" %}
+
+{% block title %}Wine Quiz{% endblock %}
+
+{% block styles %}
+{{super()}}
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+{% endblock %}
+
+{% block navbar %}
+<nav class="navbar navbar-default">
+	<div class="container-fluid">
+		<div class="navbar-header">
+			<a href="/" class="navbar-brand">Wine Quiz</a>
+		</div>
+		<ul class="nav navbar-nav navbar-right">
+			<li>
+                <p class="navbar-text">
+                    Placeholder
+                </p>
+            </li>
+		</ul>
+	</div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+	<header>
+		{% block header %}{% endblock %}
+	</header>
+</div>
+
+<div class="row">
+	{% for message in get_flashed_messages() %}
+	<div class="alert alert-warning">{{ message }}</div>
+	{% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,39 @@
+[tool.poetry]
+name = "winequiz"
+version = "0.1.0"
+description = "A multi-user wine quiz web-based game"
+authors = ["Jeff Nichols <jeff@jeffreynichols.com>"]
+readme = "README.md"
+
+
+[tool.poetry.dependencies]
+python = "^3.9"
+flask = "*"
+flask-socketio = "*"
+flask-bootstrap = "*"
+flask-sqlalchemy = "^3.1.1"
+sqlalchemy = "*"
+psycopg2 = "*"
+psycopg2-binary = "*"
+flask-migrate = "*"
+celery = "*"
+redis = "*"
+pytest = "*"
+coverage = "*"
+pytest-cov = "*"
+flake8 = "*"
+pylint = "*"
+black = "==21.7b0"
+pre-commit = "*"
+curlylint = "*"
+
+
+
+[[tool.poetry.source]]
+name = "PyPI"
+priority = "primary"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
