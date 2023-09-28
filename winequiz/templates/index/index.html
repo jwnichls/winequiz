@@ -53,6 +53,10 @@ $(document).ready(function(){
 		console.log('Slider value updated ' + msg.who + ' ' + msg.data); 
 		$('#'+msg.who).val(msg.data);
 	});
+
+	socket.on('ping', function(msg){
+		console.log('Ping ' + msg.value); 
+	});
 });
 </script>
 {% endblock %}
