@@ -6,6 +6,7 @@ import os
 
 from flask import Flask
 from flask_bootstrap import Bootstrap
+from flask_socketio import SocketIO
 
 from winequiz.celery_app import celery
 from . import (
@@ -14,14 +15,19 @@ from . import (
 )
 
 
-def create_app(test_config=None):
+bootstrap = Bootstrap()
+socketio = SocketIO()
+
+from . import websocket
+
+def create_app(test_config=None, main=True):
     """
     Creates and sets up the Flask app using the factory pattern.
     """
 
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
-    Bootstrap(app)
+    bootstrap.init_app(app)
 
     if test_config is None:
         # load config from an environment variable, if it exists
@@ -38,6 +44,15 @@ def create_app(test_config=None):
         os.makedirs(app.instance_path)
     except OSError:
         pass
+
+    # Initialize SocketIO
+    if main:
+        socketio.init_app(app,
+                          message_queue=app.config['BROKER_URL'])
+    else:
+        socketio.init_app(None,
+                          message_queue=app.config['SOCKETIO_MESSAGE_QUEUE'],
+                          async_mode='threading')
 
     # Initialize DB Module
     db.init_db(app)

@@ -406,6 +406,25 @@ files = [
 ]
 
 [[package]]
+name = "dnspython"
+version = "2.4.2"
+description = "DNS toolkit"
+optional = false
+python-versions = ">=3.8,<4.0"
+files = [
+    {file = "dnspython-2.4.2-py3-none-any.whl", hash = "sha256:57c6fbaaeaaf39c891292012060beb141791735dbb4004798328fc2c467402d8"},
+    {file = "dnspython-2.4.2.tar.gz", hash = "sha256:8dcfae8c7460a2f84b4072e26f1c9f4101ca20c071649cb7c34e8b6a93d58984"},
+]
+
+[package.extras]
+dnssec = ["cryptography (>=2.6,<42.0)"]
+doh = ["h2 (>=4.1.0)", "httpcore (>=0.17.3)", "httpx (>=0.24.1)"]
+doq = ["aioquic (>=0.9.20)"]
+idna = ["idna (>=2.1,<4.0)"]
+trio = ["trio (>=0.14,<0.23)"]
+wmi = ["wmi (>=1.5.1,<2.0.0)"]
+
+[[package]]
 name = "dominate"
 version = "2.8.0"
 description = "Dominate is a Python library for creating and manipulating HTML documents using an elegant DOM API."
@@ -415,6 +434,22 @@ files = [
     {file = "dominate-2.8.0-py2.py3-none-any.whl", hash = "sha256:1a916479c45b95fedba0d077b081d77c2d2e0f0f484ac827105087af23661d73"},
     {file = "dominate-2.8.0.tar.gz", hash = "sha256:4c90c3befaf88e612b71f4b39af7bcbef8977acfa855cec957225a8fbf504007"},
 ]
+
+[[package]]
+name = "eventlet"
+version = "0.33.3"
+description = "Highly concurrent networking library"
+optional = false
+python-versions = "*"
+files = [
+    {file = "eventlet-0.33.3-py2.py3-none-any.whl", hash = "sha256:e43b9ae05ba4bb477a10307699c9aff7ff86121b2640f9184d29059f5a687df8"},
+    {file = "eventlet-0.33.3.tar.gz", hash = "sha256:722803e7eadff295347539da363d68ae155b8b26ae6a634474d0a920be73cfda"},
+]
+
+[package.dependencies]
+dnspython = ">=1.15.0"
+greenlet = ">=0.3"
+six = ">=1.10.0"
 
 [[package]]
 name = "exceptiongroup"
@@ -1789,4 +1824,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "d6e4005eadee1cfbb2a6858990f4cbd23fb576d43492b3c0a0bca6e24b15580c"
+content-hash = "d5897f464e12f22ff2eb2010c83845d307a3884bbfb55dbc2c01b0df3b425b60"
