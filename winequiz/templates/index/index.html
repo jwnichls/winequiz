@@ -7,7 +7,7 @@
     {{super()}}
     <div class="row">
         <p>
-            Welcome to the Wine Quiz!
+            Welcome to the Wine Quiz! <span id="ping_num"></span>
         </p>
     </div>
 	<div class="row">
@@ -56,6 +56,7 @@ $(document).ready(function(){
 
 	socket.on('ping', function(msg){
 		console.log('Ping ' + msg.value); 
+		$('#ping_num').text(msg.value);
 	});
 });
 </script>
