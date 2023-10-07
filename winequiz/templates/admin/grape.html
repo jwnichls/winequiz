@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block header %}
+<h1>{% block title %}Grape Admin{% endblock %}</h1>
+{% endblock %}
+{% block content %}
+<div class="container">
+    {{super()}}
+    <div class="row">
+		<table class="table">
+			<thead>
+				<tr>
+					<th>Name</th>
+					<th>Color</th>
+					<th>Blendable</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+			{% for grape in grapes %}
+				<tr>
+					<td>{{ grape['name'] }}</td>
+					<td>{{ grape['color'] }}</td>
+					<td>{{ grape['blendable'] }}</td>
+					<td>{{ grape['id'] }}</td>
+				</tr>
+			{% endfor %}
+			</tbody>
+		</table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{super()}}
+{% endblock %}

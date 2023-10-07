@@ -10,6 +10,7 @@ from flask_socketio import SocketIO
 
 from winequiz.celery_app import celery
 from . import (
+    admin,
     db,
     index,
 )
@@ -59,6 +60,9 @@ def create_app(test_config=None, main=True):
 
     # Initialize Celery
     celery.init_app(app)
+
+    # Register Admin module
+    app.register_blueprint(admin.bp)
 
     # Register Index module
     app.register_blueprint(index.bp)

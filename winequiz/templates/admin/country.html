@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block header %}
+<h1>{% block title %}Country Admin{% endblock %}</h1>
+{% endblock %}
+{% block content %}
+<div class="container">
+    {{super()}}
+    <div class="row">
+		<table class="table">
+			<thead>
+				<tr>
+					<th>Name</th>
+					<th>Old World</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+			{% for country in countries %}
+				<tr>
+					<td>{{ country['name'] }}</td>
+					<td>{{ country['old_world'] }}</td>
+					<td>{{ country['id'] }}</td>
+				</tr>
+			{% endfor %}
+			</tbody>
+		</table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{super()}}
+{% endblock %}

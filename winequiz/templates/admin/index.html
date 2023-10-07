@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block header %}
+<h1>{% block title %}Admin{% endblock %}</h1>
+{% endblock %}
+{% block content %}
+<div class="container">
+    {{super()}}
+    <div class="row">
+        <p>
+            You may administrate the following items.
+        </p>
+    </div>
+	<div class="row">
+		<ul>
+			<li><a href="{{ url_for('admin.grapes') }}">Grapes</a></li>
+			<li><a href="{{ url_for('admin.countries') }}">Countries</a></li>
+		</ul>
+	</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{super()}}
+{% endblock %}
