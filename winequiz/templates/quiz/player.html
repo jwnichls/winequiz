@@ -141,6 +141,7 @@
 		
 	</div>
 	<div class="question-recap hidden">
+		<!--
 		<div class="row">
 			<h3>The Correct Answers</h3>
 			<p>
@@ -159,17 +160,35 @@
 				<b><span id="correct_vintage">Unknown</span></b>
 			</p>
 		</div>
+		-->
+		<div class="row">
+			<h3>Question Leaderboard</h3>
+	        <table class="table">
+	            <thead>
+	                <tr>
+	                    <th>Name</th>
+	                    <th>Score</th>
+	                </tr>
+	            </thead>
+	            <tbody id="question_scoreboard">
+	            </tbody>
+	        </table>
+		</div>
 	</div>
 	<div class="quiz-recap hidden">
 		<div class="row">
-			<h3>Leaderboard</h3>
-			<p>
-				No one wins! (TODO: Scoring)
-			</p>
+			<h3>Final Leaderboard</h3>
+	        <table class="table">
+	            <thead>
+	                <tr>
+	                    <th>Name</th>
+	                    <th>Score</th>
+	                </tr>
+	            </thead>
+	            <tbody id="final_scoreboard">
+	            </tbody>
+	        </table>
 		</div>
-		<p>
-			Quiz Recap
-		</p>
 	</div>
 </div>
 {% endblock %}
@@ -338,6 +357,17 @@ function get_answer(free_response) {
     })		
 }
 
+function fill_in_scoreboard(elem_selector, score_array) {
+	$(elem_selector).empty()
+	for (sIdx in score_array) {
+		$(elem_selector).append(
+			$('<tr><td>' + 
+			  score_array[sIdx]['name'] + 
+			  '</td><td>' + 
+			  score_array[sIdx]['score'] + 
+			  '</td></tr>'));
+	}
+}
 
 $(document).ready(function(){
 	// Load the grapes and countries
@@ -394,8 +424,9 @@ $(document).ready(function(){
 			get_answer(false);
 		} else if (msg['state'] == 4) { // question recap
 			set_correct_answers(msg['correct_grape'], msg['correct_country'], msg['correct_vintage']);
+			fill_in_scoreboard('#question_scoreboard', msg['scores'])
 		} else if (msg['state'] == 5) { // quiz recap
-			
+			fill_in_scoreboard('#final_scoreboard', msg['final_scores'])			
 		}
 		
 		// update the major portion of the interface

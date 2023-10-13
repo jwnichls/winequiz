@@ -18,6 +18,12 @@ from winequiz.db import (
     QuizItem, 
     QuizStateEnum
 )
+from winequiz.scoring import (
+    calculate_points_for_item, 
+    calculate_total_points,
+    convert_to_competitor_hash,
+    get_stats_for_item,
+)
 
 random.seed()
 
@@ -128,14 +134,20 @@ def get_quiz_state(quiz):
         json_data['countries'] = countries
         json_data['vintages'] = vintages
     elif quiz.state == QuizStateEnum.QUESTION_RECAP:
-        # TODO: Include stats on answers
         item = quiz.items[quiz.current_item]
         json_data['correct_grape'] = item.grape_id
         json_data['correct_country'] = item.country_id
         json_data['correct_vintage'] = item.vintage
+        json_data['scores'] = convert_to_competitor_hash(
+            quiz, 
+            calculate_points_for_item(quiz, item),
+        )
+        json_data['stats'] = get_stats_for_item(quiz, item)
     elif quiz.state == QuizStateEnum.QUIZ_RECAP:
-        # TODO: Include final stats
-        pass
+        json_data['final_scores'] = convert_to_competitor_hash(
+            quiz, 
+            calculate_total_points(quiz),
+        )
     
     return json_data
 
