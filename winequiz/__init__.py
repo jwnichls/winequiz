@@ -23,6 +23,18 @@ socketio = SocketIO()
 
 from . import websocket
 
+
+def load_config_for_heroku(app):
+    """
+    Load the configuration from Heroku environment variables
+    """
+    app.config['BROKER_URL'] = os.getenv('REDIS_URL')
+    app.config['RESULT_BACKEND'] = os.getenv('REDIS_URL')
+    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+
 def create_app(test_config=None, main=True):
     """
     Creates and sets up the Flask app using the factory pattern.
@@ -36,6 +48,8 @@ def create_app(test_config=None, main=True):
         # load config from an environment variable, if it exists
         if "WINE_QUIZ_SETTINGS" in os.environ:
             app.config.from_envvar("WINE_QUIZ_SETTINGS")
+        elif "ON_HEROKU" in os.environ:
+            load_config_for_heroku(app)
         # overwrite with the instance config, if it exists
         app.config.from_pyfile("config.py", silent=True)
     else:
