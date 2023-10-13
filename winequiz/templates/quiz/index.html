@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block header %}
+<h1>{% block title %}{{ quiz.name }} Quiz{% endblock %}</h1>
+{% endblock %}
+{% block content %}
+<div class="container">
+    {{super()}}
+    <div class="row">
+        <p>
+            This wine quiz is in state {{ quiz.state }}.
+        </p>
+		<p>
+			TODO: Add buttons to join the game as player, moderator or display board.
+		</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{super()}}
+{% endblock %}

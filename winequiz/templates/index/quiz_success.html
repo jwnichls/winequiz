@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{{ quiz.name }} Quiz Created!</h1>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    {{super()}}
+	<p>More data about the quiz should go here!</p>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{super()}}
+{% endblock %}

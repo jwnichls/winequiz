@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+{% block header %}
+<h1>{% block title %}The {{ quiz.name }} Quiz!{% endblock %}</h1>
+{% endblock %}
+{% block content %}
+<div class="container">
+    {{super()}}
+	<div class="lobby">
+	    <div class="row">
+	        <p>
+	            Welcome, {{ competitor.name }}!  The game will start soon.
+	        </p>
+	    </div>
+		<div class="row">
+			<h3>Who else is here?</h3>
+			<ul id="competitors">
+			{% for c in quiz.competitors %}
+				{% if c.id != competitor.id %}
+				<li cid="{{ c.id }}">{{ c.name }}</li>
+				{% endif %}
+			{% endfor %}
+			</ul>
+		</div>
+	</div>
+	<div class="free-response hidden">
+		<p>
+			Free Response Answer
+		</p>
+	</div>
+	<div class="multiple-choice hidden">
+		<p>
+			Multiple Choice Answer
+		</p>
+	</div>
+	<div class="question-recap hidden">
+		<p>
+			Question Recap
+		</p>
+	</div>
+	<div class="quiz-recap hidden">
+		<p>
+			Quiz Recap
+		</p>
+	</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{super()}}
+<script>
+var _grapes = [];
+var _countries = [];
+	
+var quiz_state_to_class_map = [
+	'none', 
+	'lobby', 
+	'free-response', 
+	'multiple-choice', 
+	'question-recap', 
+	'quiz-recap'];
+	
+var current_quiz_state = {{ quiz.state._value_ }};
+	
+$(document).ready(function(){
+	// Load the grapes and countries
+	get_grapes(function(grapes) {});
+	get_countries(function(countries) {});
+/*
+		options_elements = $('<option>').attr('value', grapes[0].id).text(grapes[0].name);
+	
+        for (grape_idx in grapes) {
+			if (grape_idx == 0) continue;
+			grape_id = grapes[grape_idx].id;
+			grape_name = grapes[grape_idx].name;
+		
+			options_elements = options_elements.add($('<option>').attr('value', grape_id).text(grape_name));
+        }
+	
+		$('.grape-select').html(options_elements);
+*/
+		
+	// sending a connect request to the server.
+	var socket = io.connect('http://localhost:5000', { transports : ['websocket'] });
+	var quizRoomName = "quiz{{ quiz.id }}";
+	var competitorId = {{ competitor.id }};
+	
+	socket.on("connect_error", function(err){
+		console.log(`connect_error due to ${err.message}`);
+	});
+
+	socket.on('after_connect', function(msg){
+		console.log('Connected!', msg);
+		socket.emit('join', {
+			'room': quizRoomName,
+			'competitor': competitorId
+		});
+	});
+
+	socket.on('disconnect', function (data) {
+		console.log('disconnecting');
+		socket.emit('competitor_left', {
+			competitor_id: competitorId
+		}, room=quizRoomName);
+	});
+
+
+	// MESSAGES TO HANDLE:
+	
+	socket.on('quiz_state_changed', function(msg){
+		console.log('Quiz state changed!', msg);
+		// update any particular screens
+		if (msg['state'] == 2) { // free response section
+			// TODO: Filter the grapes to the correct color
+		} else if (msg['state'] == 3) { // multiple choice
+			
+		} else if (msg['state'] == 3) { // question recap
+			
+		} else if (msg['state'] == 4) { // quiz recap
+			
+		}
+		
+		// update the major portion of the interface
+		$("." + quiz_state_to_class_map[current_quiz_state]).addClass('hidden');
+		current_quiz_state = msg['state'];
+		$("." + quiz_state_to_class_map[current_quiz_state]).removeClass('hidden');
+	});
+
+	socket.on('competitor_joined', function(msg){
+		console.log('Competitor joined!', msg);
+		if (msg['id'] != {{ competitor.id }}) {
+			if ($('#competitors').find("[cid='" + msg['id'] + "']").length == 0) {
+				$('#competitors').append($('<li cid="' + msg['id'] + '"></li>').text(msg['name']));
+			}
+		}
+	});
+
+	socket.on('competitor_left', function(msg){
+		console.log('Competitor left!', msg);
+		$('#competitors').find("[cid='" + msg['id'] + "']").remove();
+	});
+
+	
+	// EVENTS FROM WEB PAGE
+	
+	$('#next').on('click', function(event) {
+		socket.emit('advance_quiz_state', {
+	    	moderator_code: quizModeratorCode
+	   	}, room=quizRoomName);
+	});
+
+	$('#reverse').on('click', function(event) {
+	  	socket.emit('reverse_quiz_state', {
+	      	moderator_code: quizModeratorCode
+	   	}, room=quizRoomName);
+	});
+});
+</script>
+{% endblock %}

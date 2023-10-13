@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block header %}
+<h1>{% block title %}Join {{ quiz.name }} Quiz{% endblock %}</h1>
+{% endblock %}
+{% block content %}
+<div class="container">
+    {{super()}}
+    <div class="row">
+        <p>
+            Enter your name below to join as a player.
+        </p>
+    </div>
+	<div class="row">
+	    <form action="{{ url_for('quiz.create_player', id=quiz.id) }}" method="POST">
+	    	<div class="form-group form-inline">
+	    	    <label for="name">Name</label>
+	    	    <input name="competitor_name" id="competitor_name" class="form-control" required/>
+				<button type="submit" id="join" name="action" value="Join" class="btn btn-success">Join!</button>
+	    	</div>
+	    </form>
+	</div>
+	<div>
+		<p>
+			Or enter the game using one of these other options, which may require
+			a code:
+		</p>
+		<p>
+			<a href="">
+				<button id="largescreen" class="btn btn-success">Large Screen Display</button>
+			</a>
+			<a href="{{ url_for('quiz.join_as_moderator', id=quiz.id) }}">
+				<button id="moderator" class="btn btn-danger">Moderator</button>
+			</a>
+		</p>
+	</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{super()}}
+<script>
+$(document).ready(function(){
+});
+</script>
+{% endblock %}

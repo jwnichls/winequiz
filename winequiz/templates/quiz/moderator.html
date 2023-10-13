@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block header %}
+<h1>{% block title %}Moderating {{ quiz.name }} Quiz{% endblock %}</h1>
+{% endblock %}
+{% block content %}
+<div class="container">
+    {{super()}}
+    <div class="row">
+        <p>
+            Welcome to the Wine Quiz!
+        </p>
+    </div>
+	<div>
+		<p>
+			The quiz is currently in state "<span id="quizstate">{{ quiz.state }}</span>".
+		</p>
+	</div>
+	<div class="row">
+        <button id="reverse" class="btn btn-danger">Reverse</button>
+        <button id="next" class="btn btn-success">Next</button>
+	</div>
+	<div class="row">
+		<h2>Competitors</h2>
+		<ul id="competitors">
+		{% for competitor in quiz.competitors %}
+			<li cid="{{ competitor.id }}">{{ competitor.name }}</li>
+		{% endfor %}
+		</ul>
+	</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{super()}}
+<script>
+$(document).ready(function(){
+	// sending a connect request to the server.
+	var socket = io.connect('http://localhost:5000', { transports : ['websocket'] });
+	var quizRoomName = "quiz{{ quiz.id }}";
+	var quizModeratorCode = "{{ quiz.moderator_code }}";
+
+	socket.on("connect_error", function(err){
+		console.log(`connect_error due to ${err.message}`);
+	});
+
+	socket.on('after_connect', function(msg){
+		console.log('Connected!', msg);
+		socket.emit('join', {
+			'room': quizRoomName,
+			'competitor': -1 // Moderator
+		});
+	});
+
+	// MESSAGES TO HANDLE:
+	socket.on('quiz_state_changed', function(msg){
+		console.log('Quiz state changed!', msg);
+		$("#quizstate").text(msg['state_string']);
+	});
+
+	socket.on('competitor_joined', function(msg){
+		console.log('Competitor joined!', msg);
+		if ($('#competitors').find("[cid='" + msg['id'] + "']").length == 0) {
+			$('#competitors').append($('<li cid="' + msg['id'] + '"></li>').text(msg['name']));
+		}
+	});
+
+	socket.on('competitor_left', function(msg){
+		console.log('Competitor left!', msg);
+		$('#competitors').find("[cid='" + msg['id'] + "']").remove();
+	});
+	
+	
+	// EVENTS FROM WEB PAGE
+	$('#next').on('click', function(event) {
+	  socket.emit('advance_quiz_state', {
+	      moderator_code: quizModeratorCode
+	   }, room=quizRoomName);
+	});
+
+	$('#reverse').on('click', function(event) {
+	  socket.emit('reverse_quiz_state', {
+	      moderator_code: quizModeratorCode
+	   }, room=quizRoomName);
+	});
+});
+</script>
+{% endblock %}

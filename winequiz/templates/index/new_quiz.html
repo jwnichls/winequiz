@@ -1,0 +1,359 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1>{% block title %}{% if quiz is none or quiz.id is none %}Create{% else %}Edit{% endif %} Quiz{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    {{super()}}
+
+    <form action="{{ url_for('index.submit_new_quiz') }}" method="POST">
+    	<div class="form-group">
+    	    <label for="name">Name</label>
+    	    <input name="name" id="name" class="form-control"
+                {% if quiz is not none %}value="{{ quiz.name }}"{% endif %} required/>
+    	</div>
+    	<div class="form-group">
+    	    <label for="moderator_code">Moderator Code</label>
+    	    <input name="moderator_code" id="moderator_code" class="form-control" 
+				{% if quiz is not none %}value="{{ quiz.moderator_code }}"{% endif %} required/>
+    	</div>
+
+		<h2>Quiz Configuration</h2>
+		
+    	<div class="form-group form-inline">
+    	    <label for="duration_free_response">Free Response Duration (minutes):</label>
+    	    <input type="number" name="duration_free_response" id="duration_free_response" 
+				class="form-control" 
+				value="{% if quiz is not none %}{{ quiz.duration_free_response }}{% else %}10{% endif %}"
+				required/>
+    	</div>
+    	<div class="form-group form-inline">
+    	    <label for="duration_multiple_choice">Free Response Duration (minutes):</label>
+    	    <input type="number" name="duration_multiple_choice" id="duration_multiple_choice" 
+				class="form-control" 
+				value="{% if quiz is not none %}{{ quiz.duration_multiple_choice }}{% else %}5{% endif %}"
+				required/>
+    	</div>
+
+		<h2>
+			Blind Tasting Wines
+			
+            <button id="add_wine" class="btn btn-success" data-toggle="tooltip" title="Add Wine">
+                <span aria-hidden="true" class="glyphicon glyphicon-plus"></span>
+                <span class="sr-only">Add Wine</span>
+            </button>
+		</h2>
+		
+		<div id="blind_wines">
+		</div>
+
+    	<div class="form-group">
+            <button type="submit" id="create" name="action" value="Create" class="btn btn-info">Create</button>
+    	</div>
+    </form>
+	
+	<!-- For dynamically creating new form fields -->
+	<div id="wine_template" class="hidden">
+		<div class="blind-wine">
+			<h3>
+				<span class='wine-title'>Wine #1</span>
+			
+	            <button class="btn btn-danger remove-wine" data-toggle="tooltip" title="Remove Wine">
+	                <span aria-hidden="true" class="glyphicon glyphicon-trash"></span>
+	                <span class="sr-only">Remove Wine</span>
+	            </button>
+			</h3>
+		
+	    	<div class="form-group grape">
+	    	    <label for="grape_1">Grape</label>
+	    	    <select name="grape_1" id="grape_1" class="form-control grape-select" required>
+					<!-- To be filled in by API call -->
+	                <option>Unknown</option>
+	            </select>
+	    	</div>
+	    	<div class="form-group country">
+	    	    <label for="country_1">Country</label>
+	    	    <select name="country_1" id="country_1" class="form-control country-select" required>
+					<!-- To be filled in by API call -->
+	                <option>Unknown</option>
+	            </select>
+	    	</div>
+	    	<div class="form-group vintage">
+	    	    <label for="vintage_1">Vintage</label>
+	    	    <input type="number" name="vintage_1" id="vintage_1"
+					class="form-control vintage-input" 
+					value="2022"
+					required/>
+	    	</div>		
+
+			<h3>Multiple Choice Alternatives</h3>
+
+	    	<div class="form-group form-inline grape-alts">
+	    	    <label for="grape_alt_1_1 grape_alt_1_2 grape_alt_1_3">Grape Alternatives:</label>
+	    	    <select name="grape_alt_1_1" id="grape_alt_1_1" class="form-control grape-select" required>
+					<!-- To be filled in by API call -->
+	                <option>Unknown</option>
+	            </select>
+	    	    <select name="grape_alt_1_2" id="grape_alt_1_2" class="form-control grape-select" required>
+					<!-- To be filled in by API call -->
+	                <option>Unknown</option>
+	            </select>
+	    	    <select name="grape_alt_1_3" id="grape_alt_1_3" class="form-control grape-select" required>
+					<!-- To be filled in by API call -->
+	                <option>Unknown</option>
+	            </select>
+	    	</div>
+
+	    	<div class="form-group form-inline country-alts">
+	    	    <label for="country_alts_1">Country Alternatives:</label>
+	    	    <select name="country_alt_1_1" id="country_alt_1_1" class="form-control country-select" required>
+					<!-- To be filled in by API call -->
+	                <option>Unknown</option>
+	            </select>
+	    	    <select name="country_alt_1_2" id="country_alt_1_2" class="form-control country-select" required>
+					<!-- To be filled in by API call -->
+	                <option>Unknown</option>
+	            </select>
+	    	    <select name="country_alt_1_3" id="country_alt_1_3" class="form-control country-select" required>
+					<!-- To be filled in by API call -->
+	                <option>Unknown</option>
+	            </select>
+	    	</div>
+		
+	    	<div class="form-group form-inline vintage-alts">
+	    	    <label for="vintage_alt_1_1 vintage_alt_1_2 vintage_alt_1_3">Vintage Alternatives:</label>
+	    	    <input type="number" name="vintage_alt_1_1" id="vintage_alt_1_1" 
+					class="form-control vintage-input" 
+					value="2022"
+					required/>
+	    	    <input type="number" name="vintage_alt_1_2" id="vintage_alt_1_2" 
+					class="form-control vintage-input" 
+					value="2022"
+					required/>
+	    	    <input type="number" name="vintage_alt_1_3" id="vintage_alt_1_3" 
+					class="form-control vintage-input" 
+					value="2022"
+					required/>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{super()}}
+<script>	
+var _grapes = [];
+var _countries = [];
+
+function removeWine(e) {
+	e.preventDefault();
+	$(e.target).parents('.blind-wine').remove();
+	correctlySetBlindWineIndices();
+}
+
+function correctlySetBlindWineIndices() {
+	wine_counter = 1;
+	$('#blind_wines').find('.blind-wine').each(function(idx, wine) {
+		setBlindWineIndex(wine, wine_counter);
+		wine_counter += 1;
+	})
+}
+
+function updateIndexBlock(elems, formElement, className, index) {
+	elems = $(elems);
+	suffix = '_' + index;
+	
+	elems.find('.' + className).children(formElement).
+		attr('id', className + suffix).
+		attr('name', className + suffix);
+	elems.find('.' + className).children('label').
+		attr('for', className + suffix);
+}
+
+function updateAlternativesBlock(elems, formElement, className, index) {
+	elems = $(elems);
+	suffix = '_' + index;
+	
+	alt_names = ''
+	
+	alt_counter = 0
+	elems.find('.' + className + '-alts').children(formElement).each(function(idx, e) {
+		name_str = 'alt_' + className + suffix + '_' + alt_counter;
+		alt_counter += 1;
+		$(e).attr('id', name_str).
+			attr('name', name_str);
+		alt_names += name_str + ' ';
+	});
+	elems.find('.' + className + '-alts').children('label').
+		attr('for', alt_names);
+}
+
+function setBlindWineIndex(wine_elems, index) {
+	wine_elems = $(wine_elems);
+	wine_elems.find('.wine-title').text('Wine #' + index);
+	
+	updateIndexBlock(wine_elems, 'select', 'grape', index);
+	updateIndexBlock(wine_elems, 'select', 'country', index);
+	updateIndexBlock(wine_elems, 'input', 'vintage', index);
+
+	updateAlternativesBlock(wine_elems, 'select', 'grape', index);
+	updateAlternativesBlock(wine_elems, 'select', 'country', index);
+	updateAlternativesBlock(wine_elems, 'input', 'vintage', index);
+}
+
+function arrayAllDifferent(ary) {
+	for (i = 0; i < ary.length; i++) {
+		for(j = i+1; j < ary.length; j++) {
+			if (ary[i] == ary[j]) return false;
+		}
+	}
+	
+	return true;
+}
+
+function arrayAllSame(ary) {
+	val = ary[0];
+	for (i = 1; i < ary.length; i++) {
+		if (val != ary[i]) return false;
+	}
+	
+	return true;
+}
+
+function findById(idNum, objArray) {
+	for(i = 0; i < objArray.length; i++) {
+		if (objArray[i].id == idNum) {
+			return objArray[i];
+		}
+	}
+	
+	return null;
+}
+
+function validateWine(wine_elems) {
+	// Validate a single wine
+	
+	// Grapes and all alternatives must be different
+	chosen_grapes = [];
+	$(wine_elems).find('.grape-select').each(function(idx, elem) {
+		chosen_grapes.push($(elem).val())
+	});
+	if (!arrayAllDifferent(chosen_grapes)) {
+		// TODO: describe error to user
+		console.log('All grapes must be different')
+		return false;
+	}
+	
+	// Grapes should all be the same color
+	grapeColors = chosen_grapes.map(function(elem) { return findById(elem, _grapes).color; })
+	if (!arrayAllSame(grapeColors)) {
+		// TODO: describe error to user
+		console.log('All grapes must be the same color');
+		return false;
+	}
+
+	// Countries and all alternatives must be different
+	chosen_countries = [];
+	$(wine_elems).find('.country-select').each(function(idx, elem) {
+		chosen_countries.push($(elem).val())
+	});
+	if (!arrayAllDifferent(chosen_countries)) {
+		// TODO: describe error to user
+		console.log('All countries must be different')
+		return false;
+	}
+	
+	// Vintage and all alternatives must be different
+	chosen_vintages = [];
+	$(wine_elems).find('.vintage-input').each(function(idx, elem) {
+		chosen_vintages.push($(elem).val())
+	});
+	if (!arrayAllDifferent(chosen_vintages)) {
+		// TODO: describe error to user
+		console.log('All vintages must be different')
+		return false;
+	}
+	
+	return true;
+}
+
+function validateData() {
+	// Check name and moderator code
+	if ($('#name').val().trim().length <= 0) {
+		console.log("No quiz name specified");
+		return false;
+	}
+
+	if ($('#moderator_code').val().trim().length <= 0) {
+		console.log("No quiz name specified");
+		return false;
+	}
+	
+	// Verify that there is at least one wine
+	wines = $('#blind_wines').find('.blind-wine');
+	if (wines.length <= 0) {
+		console.log('At least one wine must be in the quiz.');
+		return false;
+	}
+	
+	var validation = true;
+	wines.each(function(idx, wine) {
+		if (!validateWine(wine)) {
+			// TODO: Make this wine as having a problem
+			validation = false;
+			return;
+		} else {
+			// TODO: Remove any error marker on this wine
+		}
+	});
+
+    return validation;
+}
+
+$(function() {
+	get_grapes(function(grapes) {
+		options_elements = $('<option>').attr('value', grapes[0].id).text(grapes[0].name);
+	
+        for (grape_idx in grapes) {
+			if (grape_idx == 0) continue;
+			grape_id = grapes[grape_idx].id;
+			grape_name = grapes[grape_idx].name;
+		
+			options_elements = options_elements.add($('<option>').attr('value', grape_id).text(grape_name));
+        }
+	
+		$('.grape-select').html(options_elements);
+	});
+	
+	get_countries(function(countries) {
+		options_elements = $('<option>').
+							attr('value', countries[0].id).
+							text(countries[0].name);
+
+		for (country_idx in countries) {
+			if (country_idx == 0) continue;
+			country_id = countries[country_idx].id;
+			country_name = countries[country_idx].name;
+	
+			options_elements = options_elements.add($('<option>').
+								attr('value', country_id).
+								text(country_name));
+		}
+
+		$('.country-select').html(options_elements);		
+	});
+	
+    $('#add_wine').click(function(e) {
+		e.preventDefault();
+		new_wine = $('#wine_template').children('.blind-wine').clone();
+		new_wine.find('.remove-wine').click(removeWine);
+		$('#blind_wines').append(new_wine);
+		
+		correctlySetBlindWineIndices();
+    })
+})
+</script>
+{% endblock %}
