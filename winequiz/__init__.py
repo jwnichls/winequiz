@@ -31,7 +31,9 @@ def load_config_for_heroku(app):
     app.config['BROKER_URL'] = os.getenv('REDIS_URL')
     app.config['RESULT_BACKEND'] = os.getenv('REDIS_URL')
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
+        'DATABASE_URL'
+    ).replace('postgres://', 'postgresql://', 1)
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 
