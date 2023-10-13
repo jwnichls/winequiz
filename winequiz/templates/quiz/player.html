@@ -369,6 +369,18 @@ function fill_in_scoreboard(elem_selector, score_array) {
 	}
 }
 
+function reset_free_response() {
+	$('#grape').val(-1);
+	$('#country').val(-1);
+	$('#vintage').val(2022);
+}
+
+function reset_multi_choice() {
+	$('#grape_radio').find('input:checked').prop('checked', false);
+	$('#country_radio').find('input:checked').prop('checked', false);
+	$('#vintage_radio').find('input:checked').prop('checked', false);
+}
+
 $(document).ready(function(){
 	// Load the grapes and countries
 	get_grapes(function(grapes) {});
@@ -417,9 +429,11 @@ $(document).ready(function(){
 		// update any particular screens
 		if (msg['state'] == 2) { // free response section
 			// Filter the grapes to the correct color
+			reset_free_response();
 			set_grape_selections(msg['grape_color']);
 			get_answer(true);
 		} else if (msg['state'] == 3) { // multiple choice
+			reset_multi_choice();
 			set_alternatives(msg['grapes'], msg['countries'], msg['vintages']);
 			get_answer(false);
 		} else if (msg['state'] == 4) { // question recap
