@@ -10,6 +10,7 @@ from werkzeug.exceptions import abort
 
 from winequiz.db import (
     get_db, 
+    Answer,
     Competitor, 
     Country, 
     Grape, 
@@ -88,7 +89,7 @@ def reverse_quiz_state(quiz):
         quiz.state = QuizStateEnum.MULTIPLE_CHOICE
     elif quiz.state == QuizStateEnum.QUIZ_RECAP:
         quiz.state = QuizStateEnum.QUESTION_RECAP
-        quiz.current_item = len(quiz.item)-1
+        quiz.current_item = len(quiz.items)-1
 
     db.session.add(quiz)
     db.session.commit()
@@ -231,6 +232,120 @@ def start_player(id):
     
     return render_template("quiz/player.html", quiz=quiz, competitor=competitor)
 
+
+def submit_answer(competitor, quiz, json_data, free_response=True):
+    """
+    Submit answer to any type of question
+    """
+    db = get_db()
+    
+    grape_id = json_data.get('grape')
+    country_id = json_data.get('country')
+    vintage = json_data.get('vintage')
+
+    item = quiz.items[quiz.current_item]
+    answer = Answer.query.filter_by(
+        competitor_id=competitor.id,
+        quiz_id=quiz.id,
+        quiz_item_id=item.id,
+        free_response=free_response,
+    ).first()
+    if answer is None:
+        answer = Answer(
+            quiz_id=quiz.id,
+            quiz_item_id=item.id,
+            competitor_id=competitor.id,
+            free_response=free_response,
+            grape_id=grape_id,
+            country_id=country_id,
+            vintage=vintage,
+        )
+    else:
+        answer.grape_id = grape_id
+        answer.country_id = country_id
+        answer.vintage = vintage
+        
+    db.session.add(answer)
+    db.session.commit()
+    
+    return {'success': True}
+
+
+@bp.route("/<int:id>/submit_free_response", methods=["POST"])
+def submit_free_response(id):
+    """
+    Submit free response answer
+    """    
+    competitor_id = request.cookies.get(WINE_QUIZ_COOKIE_NAME)
+    if competitor_id is None:
+        abort(500, 'Invalid competitor')
+    
+    competitor = Competitor.query.filter_by(id=competitor_id).first()
+    if competitor is None or competitor.quiz_id != id:
+        abort(500, 'Invalid competitor or quiz')
+
+    quiz = Quiz.query.filter_by(id=id).first()
+    
+    if not request.is_json:
+        abort(500, 'Invalid data type')
+        
+    json_data = request.get_json()
+    return submit_answer(competitor, quiz, json_data, free_response=True)
+    
+
+
+@bp.route("/<int:id>/submit_multiple_choice", methods=["POST"])
+def submit_multiple_choice(id):
+    """
+    Submit multiple choice answer
+    """
+    competitor_id = request.cookies.get(WINE_QUIZ_COOKIE_NAME)
+    if competitor_id is None:
+        abort(500, 'Invalid competitor')
+    
+    competitor = Competitor.query.filter_by(id=competitor_id).first()
+    if competitor is None or competitor.quiz_id != id:
+        abort(500, 'Invalid competitor or quiz')
+
+    quiz = Quiz.query.filter_by(id=id).first()
+    
+    if not request.is_json:
+        abort(500, 'Invalid data type')
+        
+    json_data = request.get_json()
+    return submit_answer(competitor, quiz, json_data, free_response=False)
+
+
+@bp.route("/<int:id>/answer", methods=["GET"])
+def get_answer(id):
+    """
+    Return the values from an answer for this competitor, if one exists
+    """
+    competitor_id = request.cookies.get(WINE_QUIZ_COOKIE_NAME)
+    if competitor_id is None:
+        abort(500, 'Invalid competitor')
+    
+    competitor = Competitor.query.filter_by(id=competitor_id).first()
+    if competitor is None or competitor.quiz_id != id:
+        abort(500, 'Invalid competitor or quiz')
+
+    quiz = Quiz.query.filter_by(id=id).first()
+    if quiz.state != QuizStateEnum.FREE_RESPONSE and quiz.state != QuizStateEnum.MULTIPLE_CHOICE:
+        abort(500, 'Answer can only be returned in an answering phase')
+
+    item = quiz.items[quiz.current_item]
+    answer = Answer.query.filter_by(
+        competitor_id=competitor.id,
+        quiz_id=quiz.id,
+        quiz_item_id=item.id,
+        free_response=(quiz.state == QuizStateEnum.FREE_RESPONSE),
+    ).first()
+    
+    if answer is None:
+        return {'success': True}
+        
+    return {'success': True, 'answer': answer.as_dict()}        
+    
 
 @bp.route("/<int:id>/join_as_mod", methods=["GET"])
 def join_as_moderator(id):

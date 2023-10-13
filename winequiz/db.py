@@ -207,6 +207,33 @@ class Competitor(db.Model):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 
+class Answer(db.Model):
+    """
+    Represents an answer to a question
+    """
+    
+    id = db.Column(db.Integer, primary_key=True)
+    quiz_id = db.Column(db.Integer, db.ForeignKey("quiz.id"), nullable=False)
+    quiz_item_id = db.Column(db.Integer, db.ForeignKey("quiz_item.id"), nullable=False)
+    free_response = db.Column(db.Boolean, nullable=False)
+    competitor_id = db.Column(db.Integer, db.ForeignKey("competitor.id"), nullable=False)
+    grape_id = db.Column(db.Integer, db.ForeignKey("grape.id"), nullable=True)
+    country_id = db.Column(db.Integer, db.ForeignKey("country.id"), nullable=True)
+    vintage = db.Column(db.Integer, nullable=True)
+
+    def __repr__(self):
+        """
+        Returns a string representation of this class instance
+        """
+        return f"<Answer {self.id} for quiz {self.quiz.name} and item {self.quiz_item.id}>"
+
+    def as_dict(self):
+        """
+        Returns the contents of this structure as a python dictionary
+        """
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+
 QUIZ_STATE_LABELS = [
     "Not Started",
     "Lobby Open",

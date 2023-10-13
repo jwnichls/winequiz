@@ -5,7 +5,7 @@
 {% block content %}
 <div class="container">
     {{super()}}
-	<div class="lobby">
+	<div class="lobby hidden">
 	    <div class="row">
 	        <p>
 	            Welcome, {{ competitor.name }}!  The game will start soon.
@@ -23,14 +23,122 @@
 		</div>
 	</div>
 	<div class="free-response hidden">
-		<p>
-			Free Response Answer
-		</p>
+	    <form action="{{ url_for('quiz.submit_free_response', id=quiz.id ) }}" method="POST">
+	    	<div class="form-group form-inline grape">
+	    	    <label for="grape">Grape</label>
+	    	    <select name="grape" id="grape" class="form-control grape-select" required>
+					<!-- To be filled in by API call -->
+	                <option>Unknown</option>
+	            </select>
+	    	</div>
+	    	<div class="form-group form-inline country">
+	    	    <label for="country">Country</label>
+	    	    <select name="country" id="country" class="form-control country-select" required>
+					<!-- To be filled in by API call -->
+	                <option>Unknown</option>
+	            </select>
+	    	</div>
+	    	<div class="form-group form-inline vintage">
+	    	    <label for="vintage">Vintage</label>
+	    	    <input type="number" name="vintage" id="vintage"
+					class="form-control vintage-input" 
+					value="2022"
+					required/>
+	    	</div>
+	    	<div class="form-group">
+	            <button id="free_submit" type="submit" name="action" value="Submit" class="btn btn-success">Submit</button>
+	    	</div>
+		</form>
 	</div>
 	<div class="multiple-choice hidden">
-		<p>
-			Multiple Choice Answer
-		</p>
+	    <form action="{{ url_for('quiz.submit_multiple_choice', id=quiz.id ) }}" method="POST">
+	    	<div class="form-group" id="grape_radio">
+				<h3>Grape</h3>
+				<div class="radio">
+				  <label class="grape-radio">
+				    <input type="radio" name="grape" value="grape1">
+				    <span>Grape 1</span>
+				  </label>
+				</div>
+				<div class="radio">
+				  <label class="grape-radio">
+				    <input type="radio" name="grape" value="grape2">
+				    <span>Grape 2</span>
+				  </label>
+				</div>
+				<div class="radio">
+				  <label class="grape-radio">
+				    <input type="radio" name="grape" value="grape3">
+				    <span>Grape 3</span>
+				  </label>
+				</div>
+				<div class="radio">
+				  <label class="grape-radio">
+				    <input type="radio" name="grape" value="grape4">
+				    <span>Grape 4</span>
+				  </label>
+				</div>
+			</div>
+	    	<div class="form-group" id="country_radio">
+				<h3>Country</h3>
+				<div class="radio">
+				  <label class="country-radio">
+				    <input type="radio" name="country" value="country1">
+				    <span>Country 1</span>
+				  </label>
+				</div>
+				<div class="radio">
+				  <label class="country-radio">
+				    <input type="radio" name="country" value="country2">
+				    <span>Country 2</span>
+				  </label>
+				</div>
+				<div class="radio">
+				  <label class="country-radio">
+				    <input type="radio" name="country" value="country3">
+				    <span>Country 3</span>
+				  </label>
+				</div>
+				<div class="radio">
+				  <label class="country-radio">
+				    <input type="radio" name="country" value="country4">
+				    <span>Country 4</span>
+				  </label>
+				</div>
+			</div>
+	    	<div class="form-group" id="vintage_radio">
+				<h3>Vintage</h3>
+				<div class="radio">
+				  <label class="vintage-radio">
+				    <input type="radio" name="vintage" value="vintage1">
+				    <span>Vintage 1</span>
+				  </label>
+				</div>
+				<div class="radio">
+				  <label class="vintage-radio">
+				    <input type="radio" name="vintage" value="vintage2">
+				    <span>Vintage 2</span>
+				  </label>
+				</div>
+				<div class="radio">
+				  <label class="vintage-radio">
+				    <input type="radio" name="vintage" value="vintage3">
+				    <span>Vintage 3</span>
+				  </label>
+				</div>
+				<div class="radio">
+				  <label class="vintage-radio">
+				    <input type="radio" name="vintage" value="vintage4">
+				    <span>Vintage 4</span>
+				  </label>
+				</div>
+			</div>
+	    	<div class="form-group">
+	            <button id="multi_submit" type="submit" name="action" value="Submit" class="btn btn-success">Submit</button>
+	    	</div>
+		</form>
+				
+		
 	</div>
 	<div class="question-recap hidden">
 		<p>
@@ -60,24 +168,154 @@ var quiz_state_to_class_map = [
 	'quiz-recap'];
 	
 var current_quiz_state = {{ quiz.state._value_ }};
+
+function set_grape_selections(grape_color) {
+	options_elements = $('<option>').attr('value', '-1').text('');
+
+    for (grape_idx in _grapes) {
+		if (grape_color == _grapes[grape_idx].color) {
+			grape_id = _grapes[grape_idx].id;
+			grape_name = _grapes[grape_idx].name;
 	
+			options_elements = options_elements.add($('<option>').attr('value', grape_id).text(grape_name));
+		}
+    }
+
+	$('.grape-select').html(options_elements);
+}
+
+function set_radio_label(elem, val, text) {
+	$(elem).find('span').text(text);
+	$(elem).find('input').attr('value', val);
+}
+
+function set_radio_group(elem, radioClass, valTextAry) {
+	labels = $(elem).find(radioClass);
+	for (idx = 0; idx < labels.length; idx++) {
+		valText = valTextAry[idx];
+		set_radio_label(labels[idx], valText['value'], valText['text'])
+	}
+}
+
+function getValText(objList, selectionsList) {
+	valText = []
+	for (sIdx in selectionsList) {
+		selectionId = selectionsList[sIdx];
+		for (oIdx in objList) {
+			if (selectionId == objList[oIdx]['id']) {
+				valText.push({'value': selectionId, 'text': objList[oIdx]['name']});
+			}
+		}
+	}
+	
+	return valText;
+}
+
+function set_alternatives(grapes, countries, vintages) {
+	// grapes
+	grapeValText = getValText(_grapes, grapes);
+	set_radio_group($('#grape_radio'), '.grape-radio', grapeValText);
+	
+	// countries
+	countryValText = getValText(_countries, countries);
+	set_radio_group($('#country_radio'), '.country-radio', countryValText);
+	
+	// vintages
+	vintageValText = []
+	for (idx in vintages) {
+		vintageValText.push({'value': vintages[idx], 'text': vintages[idx]})
+	}
+	set_radio_group($('#vintage_radio'), '.vintage-radio', vintageValText);
+}
+
+function submit_free_response() {
+	answer_data = {
+		'quiz': {{ quiz.id }},
+		'grape': $('#grape').val(),
+		'country': $('#country').val(),
+		'vintage': $('#vintage').val()
+	}
+	console.log(answer_data);
+	$.ajax({
+	    url: '/quiz/{{ quiz.id }}/submit_free_response',
+	    type: 'POST',
+	    data: JSON.stringify(answer_data),
+	    contentType: 'application/json; charset=utf-8',
+	    dataType: 'json',
+	    async: true,
+	    success: function(msg) {
+	        console.log('free response answers submitted successfully')
+	    },
+		error: function() {
+			console.log('error submitting free response');
+			// alert the user to the failure
+		}
+	});
+}
+
+function submit_multiple_choice() {
+	answer_data = {
+		'quiz': {{ quiz.id }},
+		'grape': parseInt($('#grape_radio').find('input:checked').val()),
+		'country': parseInt($('#country_radio').find('input:checked').val()),
+		'vintage': parseInt($('#vintage_radio').find('input:checked').val())
+	}
+	
+	$.ajax({
+	    url: '/quiz/{{ quiz.id }}/submit_multiple_choice',
+	    type: 'POST',
+	    data: JSON.stringify(answer_data),
+	    contentType: 'application/json; charset=utf-8',
+	    dataType: 'json',
+	    async: true,
+	    success: function(msg) {
+	        console.log('multiple choice answers submitted successfully')
+	    },
+		error: function() {
+			console.log('error submitting multiple choice');
+			// alert the user to the failure
+		}
+	});
+}
+
+function get_answer(free_response) {
+    $.getJSON('{{ url_for('quiz.get_answer', id=quiz.id) }}', function(data) {
+		if ('answer' in data) {
+			console.log(data);
+			grape_id = data['answer']['grape_id']
+			country_id = data['answer']['country_id']
+			vintage = data['answer']['vintage']
+			free_response = data['answer']['free_response']
+		
+			if (free_response) {
+				$('#grape').val(grape_id);
+				$('#country').val(country_id);
+				$('#vintage').val(vintage);
+			} else {
+				$('#grape_radio').find('input[value=' + grape_id + ']').prop('checked', true);
+				$('#country_radio').find('input[value=' + country_id + ']').prop('checked', true);
+				$('#vintage_radio').find('input[value=' + vintage + ']').prop('checked', true);
+			}
+		}
+    })		
+}
+
+
 $(document).ready(function(){
 	// Load the grapes and countries
 	get_grapes(function(grapes) {});
-	get_countries(function(countries) {});
-/*
-		options_elements = $('<option>').attr('value', grapes[0].id).text(grapes[0].name);
+	get_countries(function(countries) {
+		options_elements = $('<option>').attr('value', '-1').text('');
 	
-        for (grape_idx in grapes) {
-			if (grape_idx == 0) continue;
-			grape_id = grapes[grape_idx].id;
-			grape_name = grapes[grape_idx].name;
+        for (country_idx in countries) {
+			country_id = countries[country_idx].id;
+			country_name = countries[country_idx].name;
 		
-			options_elements = options_elements.add($('<option>').attr('value', grape_id).text(grape_name));
+			options_elements = options_elements.add($('<option>').attr('value', country_id).text(country_name));
         }
 	
-		$('.grape-select').html(options_elements);
-*/
+		$('.country-select').html(options_elements);
+	});
 		
 	// sending a connect request to the server.
 	var socket = io.connect('http://localhost:5000', { transports : ['websocket'] });
@@ -110,9 +348,12 @@ $(document).ready(function(){
 		console.log('Quiz state changed!', msg);
 		// update any particular screens
 		if (msg['state'] == 2) { // free response section
-			// TODO: Filter the grapes to the correct color
+			// Filter the grapes to the correct color
+			set_grape_selections(msg['grape_color']);
+			get_answer(true);
 		} else if (msg['state'] == 3) { // multiple choice
-			
+			set_alternatives(msg['grapes'], msg['countries'], msg['vintages']);
+			get_answer(false);
 		} else if (msg['state'] == 3) { // question recap
 			
 		} else if (msg['state'] == 4) { // quiz recap
@@ -141,17 +382,15 @@ $(document).ready(function(){
 
 	
 	// EVENTS FROM WEB PAGE
-	
-	$('#next').on('click', function(event) {
-		socket.emit('advance_quiz_state', {
-	    	moderator_code: quizModeratorCode
-	   	}, room=quizRoomName);
+		
+	$('#free_submit').on('click', function(event) {
+		event.preventDefault();
+		submit_free_response();
 	});
 
-	$('#reverse').on('click', function(event) {
-	  	socket.emit('reverse_quiz_state', {
-	      	moderator_code: quizModeratorCode
-	   	}, room=quizRoomName);
+	$('#multi_submit').on('click', function(event) {
+		event.preventDefault();
+		submit_multiple_choice();
 	});
 });
 </script>
