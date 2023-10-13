@@ -27,6 +27,7 @@ black = "==21.7b0"
 pre-commit = "*"
 curlylint = "*"
 eventlet = "^0.33.3"
+gunicorn = "^21.2.0"
 
 
 [[tool.poetry.source]]
