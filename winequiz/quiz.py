@@ -53,7 +53,7 @@ def advance_quiz_state(quiz):
         quiz.state = QuizStateEnum.QUESTION_RECAP
     elif quiz.state == QuizStateEnum.QUESTION_RECAP:
         quiz.current_item = quiz.current_item + 1
-        if len(quiz.items) >= quiz.current_item:
+        if quiz.current_item >= len(quiz.items):
             quiz.state = QuizStateEnum.QUIZ_RECAP
         else:
             quiz.state = QuizStateEnum.FREE_RESPONSE
@@ -86,6 +86,7 @@ def reverse_quiz_state(quiz):
     elif quiz.state == QuizStateEnum.FREE_RESPONSE:
         quiz.current_item = quiz.current_item - 1
         if quiz.current_item < 0:
+            quiz.current_item = 0
             quiz.state = QuizStateEnum.LOBBY_OPEN
         else:
             quiz.state = QuizStateEnum.QUESTION_RECAP
