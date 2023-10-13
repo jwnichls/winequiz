@@ -141,11 +141,32 @@
 		
 	</div>
 	<div class="question-recap hidden">
-		<p>
-			Question Recap
-		</p>
+		<div class="row">
+			<h3>The Correct Answers</h3>
+			<p>
+				Were you right?
+			</p>
+			<p>
+				<small>Grape</small><br/>
+				<b><span id="correct_grape">Unknown</span></b>
+			</p>
+			<p>
+				<small>Country</small><br/>
+				<b><span id="correct_country">Unknown</span></b>
+			</p>
+			<p>
+				<small>Vintage</small><br/>
+				<b><span id="correct_vintage">Unknown</span></b>
+			</p>
+		</div>
 	</div>
 	<div class="quiz-recap hidden">
+		<div class="row">
+			<h3>Leaderboard</h3>
+			<p>
+				No one wins! (TODO: Scoring)
+			</p>
+		</div>
 		<p>
 			Quiz Recap
 		</p>
@@ -182,6 +203,16 @@ function set_grape_selections(grape_color) {
     }
 
 	$('.grape-select').html(options_elements);
+}
+
+function getNameForId(objList, id) {
+	for (oIdx in objList) {
+		if (id == objList[oIdx]['id']) {
+			return objList[oIdx]['name'];
+		}
+	}
+	
+	return 'Unknown';
 }
 
 function set_radio_label(elem, val, text) {
@@ -226,6 +257,13 @@ function set_alternatives(grapes, countries, vintages) {
 		vintageValText.push({'value': vintages[idx], 'text': vintages[idx]})
 	}
 	set_radio_group($('#vintage_radio'), '.vintage-radio', vintageValText);
+}
+
+function set_correct_answers(grape_id, country_id, vintage) {
+	console.log('set_correct_answer',grape_id,country_id,vintage);
+	$('#correct_grape').text(getNameForId(_grapes, grape_id));
+	$('#correct_country').text(getNameForId(_countries, country_id));
+	$('#correct_vintage').text(vintage);
 }
 
 function submit_free_response() {
@@ -354,9 +392,9 @@ $(document).ready(function(){
 		} else if (msg['state'] == 3) { // multiple choice
 			set_alternatives(msg['grapes'], msg['countries'], msg['vintages']);
 			get_answer(false);
-		} else if (msg['state'] == 3) { // question recap
-			
-		} else if (msg['state'] == 4) { // quiz recap
+		} else if (msg['state'] == 4) { // question recap
+			set_correct_answers(msg['correct_grape'], msg['correct_country'], msg['correct_vintage']);
+		} else if (msg['state'] == 5) { // quiz recap
 			
 		}
 		

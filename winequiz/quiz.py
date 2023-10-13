@@ -129,7 +129,10 @@ def get_quiz_state(quiz):
         json_data['vintages'] = vintages
     elif quiz.state == QuizStateEnum.QUESTION_RECAP:
         # TODO: Include stats on answers
-        pass
+        item = quiz.items[quiz.current_item]
+        json_data['correct_grape'] = item.grape_id
+        json_data['correct_country'] = item.country_id
+        json_data['correct_vintage'] = item.vintage
     elif quiz.state == QuizStateEnum.QUIZ_RECAP:
         # TODO: Include final stats
         pass
