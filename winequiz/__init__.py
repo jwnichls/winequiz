@@ -46,17 +46,19 @@ def create_app(test_config=None, main=True):
     app = Flask(__name__, instance_relative_config=True)
     bootstrap.init_app(app)
 
-    if test_config is None:
+    load_config_for_heroku(app)
+
+    #if test_config is None:
         # load config from an environment variable, if it exists
-        if "WINE_QUIZ_SETTINGS" in os.environ:
-            app.config.from_envvar("WINE_QUIZ_SETTINGS")
-        elif "ON_HEROKU" in os.environ:
-            load_config_for_heroku(app)
+    #    if "WINE_QUIZ_SETTINGS" in os.environ:
+    #        app.config.from_envvar("WINE_QUIZ_SETTINGS")
+    #    elif "ON_HEROKU" in os.environ:
+    #        load_config_for_heroku(app)
         # overwrite with the instance config, if it exists
-        app.config.from_pyfile("config.py", silent=True)
-    else:
+    #    app.config.from_pyfile("config.py", silent=True)
+    #else:
         # load the test config if passed in
-        app.config.from_mapping(test_config)
+    #    app.config.from_mapping(test_config)
 
     # ensure the instance folder exists
     try:
