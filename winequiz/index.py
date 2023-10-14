@@ -15,7 +15,7 @@ def index():
     """
     The main index route
     """
-    active_quizes = Quiz.query.filter_by(state=QuizStateEnum.LOBBY_OPEN).all()
+    active_quizes = Quiz.query.filter((Quiz.state != QuizStateEnum.NOT_STARTED) & (Quiz.state != QuizStateEnum.QUIZ_RECAP)).all()
     
     return render_template("index/index.html", quizes=active_quizes)
 

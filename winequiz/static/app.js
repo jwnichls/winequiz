@@ -20,3 +20,12 @@ function get_countries(callback) {
         }			
     })
 }
+
+function get_competitors(quiz_id, callback) {
+    $.getJSON('/quiz/' + quiz_id + '/competitors', function(data) {
+        // Make options with grape as name and ID as value
+        if (data.competitors) {
+			callback(data.competitors);
+        }
+    })		
+}

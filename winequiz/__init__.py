@@ -14,14 +14,13 @@ from . import (
     api,
     db,
     index,
-    quiz,
 )
 
 
 bootstrap = Bootstrap()
 socketio = SocketIO()
 
-from . import websocket
+from . import quiz, websocket
 
 
 def load_config_for_heroku(app):

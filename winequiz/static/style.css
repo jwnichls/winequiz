@@ -1,3 +1,24 @@
 .quiz-title {
 	font-size: 16pt;
 } 
+
+.competitor-name {
+	text-align: center;
+}
+
+.dot {
+  height: 8pt;
+  width: 8pt;
+  background-color: #000;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 4px;
+}
+
+.no-answer {
+  background-color: #f00;	
+}
+
+.answered {
+  background-color: #0f0;		
+}

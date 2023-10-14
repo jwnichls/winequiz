@@ -324,7 +324,6 @@ function set_alternatives(grapes, countries, vintages) {
 }
 
 function set_correct_answers(grape_id, country_id, vintage) {
-	console.log('set_correct_answer',grape_id,country_id,vintage);
 	$('#correct_grape').text(getNameForId(_grapes, grape_id));
 	$('#correct_country').text(getNameForId(_countries, country_id));
 	$('#correct_vintage').text(vintage);

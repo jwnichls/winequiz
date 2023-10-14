@@ -25,6 +25,8 @@ from winequiz.scoring import (
     get_stats_for_item,
 )
 
+from . import socketio
+
 random.seed()
 
 bp = Blueprint("quiz", __name__, url_prefix="/quiz")
@@ -295,7 +297,7 @@ def submit_answer(competitor, quiz, json_data, free_response=True):
     db.session.commit()
     
     if grape_id is not None and country_id is not None and vintage is not None:
-        emit('full_answer_received', {'id': competitor.id, 'name': competitor.name}, room=f'quiz{quiz.id}')
+        socketio.emit('full_answer_received', {'id': competitor.id, 'name': competitor.name}, room=f'quiz{quiz.id}')
     
     return {'success': True}
 
@@ -396,6 +398,46 @@ def start_moderator(id):
         abort(401, 'Unauthorized')
     
     return render_template("quiz/moderator.html", quiz=quiz)
+
+
+@bp.route("/<int:id>/competitors", methods=["GET"])
+def get_competitors(id):
+    """
+    Return JSON of current competitor information
+    """
+    quiz = Quiz.query.filter_by(id=id).first()
+    
+    if quiz is None:
+        abort(404, 'No such quiz')
+
+    answers = None
+    if quiz.state == QuizStateEnum.FREE_RESPONSE or quiz.state == QuizStateEnum.MULTIPLE_CHOICE:
+        answers = Answer.query.filter_by(
+            quiz_id=quiz.id, 
+            quiz_item_id=quiz.items[quiz.current_item].id,
+            free_response=(quiz.state == QuizStateEnum.FREE_RESPONSE)
+        ).all()
+    
+    return_value = []
+    for competitor in quiz.competitors:
+        competitor_data = {
+            'id': competitor.id,
+            'name': competitor.name,
+            'answered': False,
+        }
+        
+        if answers is not None:
+            for answer in answers:
+                if answer.competitor_id == competitor.id:
+                    competitor_data['answered'] = (
+                        answer.grape_id is not None and 
+                        answer.country_id is not None and 
+                        answer.vintage is not None
+                    )
+        
+        return_value.append(competitor_data)
+        
+    return {'success': True, 'competitors': return_value}
 
 
 @bp.route("/killcookie", methods=["GET"])

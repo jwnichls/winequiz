@@ -34,3 +34,8 @@
 	{% endfor %}
 </div>
 {% endblock %}
+
+{% block scripts %}
+{{super()}}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}

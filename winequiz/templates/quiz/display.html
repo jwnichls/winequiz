@@ -1,43 +1,150 @@
 {% extends 'base.html' %}
 {% block header %}
-<h1>{% block title %}The {{ quiz.name }} Quiz!{% endblock %}</h1>
 {% endblock %}
 {% block content %}
 <div class="container">
     {{super()}}
 	<div class="lobby hidden">
 	    <div class="row">
-			<div class="col-md-12" style="text-align: center;">
+			<div class="col-md-4" style="text-align: center;">
+				<img src="/static/qr-code.png" width="300" height="300"/>
+			</div>
+			<div class="col-md-8" style="text-align: center;">
 		        <h1>
-		            Welcome!
+		            Welcome to the 4th wine competition!
 				</h1>
 				<p>
-					The game will start soon.
+					This time we will experiment with using our phones to enter our answers as we blind taste
+					the wines.  Here's what to do to get set up:
+				</p><br/>
+				<p>1. Scan the QR code to the left with your phone</p>
+				<p>2. Tap the "Join" button next to "4th Wine Competition"</p>
+				<p>3. Enter a unique name for yourself</p>
+				<p>4. Tap the "Join" button</p>
+				<p>5. Wait for the competition to begin</p><br/>
+				<p>
+					If you lose the web page, just scan the QR code again. You should not need to enter your name again.
+				</p>
+				<p>
+					All wines that we are tasting today are testable for the Advanced Sommelier exam.  Copies of the list of
+					testable wines can be found around the space.
 				</p>
 			</div>
 	    </div>
 		<div class="row">
 			<div class="col-md-12">			
 				<h3>Who else is here?</h3>
-				<ul id="competitors">
+			</div>
+		</div>
+		<div class="competitors-section">
+			<div class="row">
 				{% for c in quiz.competitors %}
-					<li cid="{{ c.id }}">{{ c.name }}</li>
+				<div class="col-md-1">
+					<p cid="{{ c.id }}" class="competitor-name">{{ c.name }}</p>
+				</div>
 				{% endfor %}
-				</ul>
 			</div>
 		</div>
 	</div>
 	<div class="free-response hidden">
+	    <div class="row">
+			<div class="col-md-4" style="text-align: center;">
+				<img src="/static/qr-code.png" width="300" height="300"/>
+			</div>
+			<div class="col-md-8" style="text-align: center;">
+		        <h1>
+		            Welcome to the 4th wine competition!
+				</h1>
+				<p>
+					We are now blind tasting a wine.
+				</p>
+				<p>
+					This is the "free response" period, in which you have to pick the grape, 
+					country and vintage for the wine.  10 points are awarded for each correct
+					selection.
+				</p>
+				<p>
+					Please enter your answers on your phone.  Paper forms are available if
+					the technology does not work.
+				</p>
+			</div>
+	    </div>
 		<div class="row">
-			<div class="col-md-12">
-				<!-- TODO: Show who has answered -->
+			<div class="col-md-12">			
+				<br/><br/><br/>
+				<h3>Who else is here?</h3>
+			</div>
+		</div>
+		<div class="competitors-section">
+			<div class="row">
+				{% for c in quiz.competitors %}
+				<div class="col-md-1">
+					<p cid="{{ c.id }}" class="competitor-name">{{ c.name }}</p>
+				</div>
+				{% endfor %}
 			</div>
 		</div>
 	</div>
 	<div class="multiple-choice hidden">
+	    <div class="row">
+			<div class="col-md-6" style="text-align: center;">
+		        <h1>
+		            Welcome to the 4th wine competition!
+				</h1>
+				<p>
+					We are now blind tasting a wine.
+				</p>
+				<p>
+					This is the "multiple choice" period, in which you have to pick the grape, 
+					country and vintage for the wine.  5 points are awarded for each correct
+					selection.
+				</p>
+				<p>
+					The multiple choice options can be seen to the right.
+				</p>
+				<p>
+					Please enter your answers on your phone.  Paper forms are available if
+					the technology does not work.
+				</p>
+			</div>
+			<div class="col-md-2" id="grape_alt" style="text-align: center;">
+				<br/><br/><br/>
+				<h3>Grape</h3>
+				<p class="grape-item">Unknown</p>
+				<p class="grape-item">Unknown</p>
+				<p class="grape-item">Unknown</p>
+				<p class="grape-item">Unknown</p>
+			</div>
+			<div class="col-md-2" id="country_alt" style="text-align: center;">
+				<br/><br/><br/>
+				<h3>Country</h3>
+				<p class="country-item">Unknown</p>
+				<p class="country-item">Unknown</p>
+				<p class="country-item">Unknown</p>
+				<p class="country-item">Unknown</p>
+			</div>
+			<div class="col-md-2" id="vintage_alt" style="text-align: center;">
+				<br/><br/><br/>
+				<h3>Vintage</h3>
+				<p class="vintage-item">Unknown</p>
+				<p class="vintage-item">Unknown</p>
+				<p class="vintage-item">Unknown</p>
+				<p class="vintage-item">Unknown</p>
+			</div>
+	    </div>
 		<div class="row">
-			<div class="col-md-12">
-				<!-- TODO: Show who has answered -->
+			<div class="col-md-12">			
+				<br/><br/><br/>
+				<h3>Who else is here?</h3>
+			</div>
+		</div>
+		<div class="competitors-section">
+			<div class="row">
+				{% for c in quiz.competitors %}
+				<div class="col-md-1">
+					<p cid="{{ c.id }}" class="competitor-name">{{ c.name }}</p>
+				</div>
+				{% endfor %}
 			</div>
 		</div>
 	</div>
@@ -65,14 +172,25 @@
 		</div>
 		-->
 		<div class="row">
-			<div class="col-md-12">
-				<h3>How did you do on this wine?</h3>
+			<div class="col-md-6" style="text-align: center;">
+		        <h1>
+		            Wine Results
+				</h1>
 				<p>
 					Correct answers will be revealed at the end of the competition.
 				</p>
-				<p>
-					Points shown here are just for this wine, not the overall competition.
-				</p>
+				<div>
+					<canvas id="grape_breakdown"></canvas>
+				</div>
+				<div>
+					<canvas id="country_breakdown"></canvas>
+				</div>
+				<div>
+					<canvas id="vintage_breakdown"></canvas>
+				</div>
+			</div>
+			<div class="col-md-6">
+				<h3>How did you do on this wine?</h3>
 		        <table class="table">
 		            <thead>
 		                <tr>
@@ -88,7 +206,15 @@
 	</div>
 	<div class="quiz-recap hidden">
 		<div class="row">
-			<div class="col-md-12">
+			<div class="col-md-6" style="text-align: center;">
+		        <h1>
+		            Congrats to the winners!
+				</h1>
+				<p>
+					Correct answers will be revealed shortly.
+				</p>
+			</div>
+			<div class="col-md-6">
 				<h3>Final Leaderboard</h3>
 		        <table class="table">
 		            <thead>
@@ -111,6 +237,10 @@
 <script>
 var _grapes = [];
 var _countries = [];
+
+var grape_chart = null;
+var country_chart = null;
+var vintage_chart = null;
 	
 var quiz_state_to_class_map = [
 	'none', 
@@ -145,16 +275,225 @@ function fill_in_scoreboard(elem_selector, score_array) {
 }
 
 function set_correct_answers(grape_id, country_id, vintage) {
-	console.log('set_correct_answer',grape_id,country_id,vintage);
 	$('#correct_grape').text(getNameForId(_grapes, grape_id));
 	$('#correct_country').text(getNameForId(_countries, country_id));
 	$('#correct_vintage').text(vintage);
+}
+
+function update_competitors(competitors) {
+	var rowElems = []
+	var rowCounter = 0
+
+	var currentElem = $('<div class="row"></div>');
+	rowElems.push(currentElem);
+	for (cIdx in competitors) {
+		var competitor = competitors[cIdx]
+		currentElem.append($('<div class="col-md-2"></div>').
+			append($('<p class="competitor-name"></p>').
+			attr('cid', competitor['id']).
+			append($('<div class="dot"></div>').
+				addClass(competitor['answered'] ? 'answered' : 'no-answer').
+				addClass((current_quiz_state == 2 || current_quiz_state == 3) ? '' : 'hidden')).
+			append($('<span></span>').
+		    text(competitor['name']))));
+		rowCounter++;
+		
+		if (rowCounter >= 6) {
+			rowCounter = 0;
+			currentElem = $('<div class="row"></div>');
+			rowElems.push(currentElem);
+		}
+	}
+	
+	$('.competitors-section').empty()
+	for (rIdx in rowElems) {
+		$('.competitors-section').append(rowElems[rIdx]);
+	}
+}
+
+function set_radio_group(elem, radioClass, valTextAry) {
+	labels = $(elem).find(radioClass);
+	for (idx = 0; idx < labels.length; idx++) {
+		valText = valTextAry[idx];
+		$(labels[idx]).text(valText['text']);
+	}
+}
+
+function getValText(objList, selectionsList) {
+	valText = []
+	for (sIdx in selectionsList) {
+		selectionId = selectionsList[sIdx];
+		for (oIdx in objList) {
+			if (selectionId == objList[oIdx]['id']) {
+				valText.push({'value': selectionId, 'text': objList[oIdx]['name']});
+			}
+		}
+	}
+	
+	return valText;
+}
+
+function set_alternatives(grapes, countries, vintages) {
+	// grapes
+	grapeValText = getValText(_grapes, grapes);
+	set_radio_group($('#grape_alt'), '.grape-item', grapeValText);
+	
+	// countries
+	countryValText = getValText(_countries, countries);
+	set_radio_group($('#country_alt'), '.country-item', countryValText);
+	
+	// vintages
+	vintageValText = []
+	for (idx in vintages) {
+		vintageValText.push({'value': vintages[idx], 'text': vintages[idx]})
+	}
+	set_radio_group($('#vintage_alt'), '.vintage-item', vintageValText);
+}
+
+function create_datasets(stats, list, listName) {
+	names = []
+	freeResponseCounts = []
+	multiResponseCounts = []
+
+	for (idx in list) {
+		oId = list[idx]['id'];
+		oName = list[idx]['name'];
+		
+		frc = stats['free_response'][listName][oId];
+		mrc = stats['multiple_choice'][listName][oId];
+		
+		if (frc == undefined && mrc == undefined) continue;
+		
+		if (frc == undefined) frc = 0;
+		if (mrc == undefined) mrc = 0;
+		
+		names.push(oName);
+		freeResponseCounts.push(frc);
+		multiResponseCounts.push(mrc);
+	}
+	
+	return {
+		labels: names,
+		datasets: [{
+			label: 'Free Response',
+			data: freeResponseCounts,
+			borderWidth: 1
+		}, {
+			label: 'Multiple Choice',
+			data: multiResponseCounts,
+			borderWidth: 1
+		}]
+	};
+}
+
+
+function create_vintage_dataset(stats) {
+	names = []
+	freeResponseCounts = []
+	multiResponseCounts = []
+
+	freeVintages = Object.keys(stats['free_response']['vintages'])
+	multiVintages = Object.keys(stats['multiple_choice']['vintages'])
+	for (fIdx in freeVintages) {
+		vintage = freeVintages[fIdx];
+		if (names.indexOf(vintage) < 0) {
+			names.push(vintage);
+		}
+	}
+	for (mIdx in multiVintages) {
+		vintage = multiVintages[mIdx];
+		if (names.indexOf(vintage) < 0) {
+			names.push(vintage);
+		}
+	}
+	
+	names.sort();
+	for (nIdx in names) {
+		frc = stats['free_response']['vintages'][names[nIdx]];
+		mrc = stats['multiple_choice']['vintages'][names[nIdx]];
+		
+		if (frc == undefined) frc = 0;
+		if (mrc == undefined) mrc = 0;
+		
+		freeResponseCounts.push(frc);
+		multiResponseCounts.push(mrc);
+	}
+
+	return {
+		labels: names,
+		datasets: [{
+			label: 'Free Response',
+			data: freeResponseCounts,
+			borderWidth: 1
+		}, {
+			label: 'Multiple Choice',
+			data: multiResponseCounts,
+			borderWidth: 1
+		}]
+	};	
+}
+
+function generate_graphs(stats) {
+	grape_dataset = create_datasets(stats, _grapes, 'grapes');	
+	grape_chart.data = grape_dataset;
+	grape_chart.update();
+	
+	country_dataset = create_datasets(stats, _countries, 'countries');	
+	country_chart.data = country_dataset;
+	country_chart.update();
+	
+	vintage_dataset = create_vintage_dataset(stats);
+	vintage_chart.data = vintage_dataset;
+	vintage_chart.update();
 }
 
 $(document).ready(function(){
 	// Load the grapes and countries
 	get_grapes(function(grapes) {});
 	get_countries(function(countries) {});
+	get_competitors({{ quiz.id }}, update_competitors);
+	
+	const grape_chart_elem = document.getElementById('grape_breakdown');
+	grape_chart = new Chart(grape_chart_elem, {
+		type: 'bar',
+		data: [],
+		options: {
+			indexAxis: 'y',
+			elements: {
+				bar: {
+			        borderWidth: 1,
+			    }
+			},
+		}
+	});
+
+	const country_chart_elem = document.getElementById('country_breakdown');
+	country_chart = new Chart(country_chart_elem, {
+		type: 'bar',
+		data: [],
+		options: {
+			indexAxis: 'y',
+			elements: {
+				bar: {
+			        borderWidth: 1,
+			    }
+			},
+		}
+	});
+	
+	const vintage_chart_elem = document.getElementById('vintage_breakdown');
+	vintage_chart = new Chart(vintage_chart_elem, {
+		type: 'bar',
+		data: [],
+		options: {
+			indexAxis: 'y',
+			elements: {
+				bar: {
+			        borderWidth: 1,
+			    }
+			},
+		}
+	});
 		
 	// sending a connect request to the server.
 	var socket = io.connect({ transports : ['websocket'] });
@@ -182,15 +521,22 @@ $(document).ready(function(){
 	socket.on('quiz_state_changed', function(msg){
 		console.log('Quiz state changed!', msg);
 		// update any particular screens
-		/*
-		if (msg['state'] == 2) { // free response section
-			// Filter the grapes to the correct color
+		if (msg['state'] == 1) {
+			$('.dot').addClass('hidden');
+		} else if (msg['state'] == 2) { // free response section
+			$('.dot').removeClass('hidden').removeClass('answered').addClass('no-answer');
+			get_competitors({{ quiz.id }}, update_competitors);
 		} else if (msg['state'] == 3) { // multiple choice
-		} else */
-		if (msg['state'] == 4) { // question recap
+			$('.dot').removeClass('hidden').removeClass('answered').addClass('no-answer');
+			get_competitors({{ quiz.id }}, update_competitors);
+			set_alternatives(msg['grapes'], msg['countries'], msg['vintages']);
+		} else if (msg['state'] == 4) { // question recap
+			$('.dot').addClass('hidden');
 			set_correct_answers(msg['correct_grape'], msg['correct_country'], msg['correct_vintage']);
 			fill_in_scoreboard('#question_scoreboard', msg['scores'])
+			generate_graphs(msg['stats']);
 		} else if (msg['state'] == 5) { // quiz recap
+			$('.dot').addClass('hidden');
 			fill_in_scoreboard('#final_scoreboard', msg['final_scores'])			
 		}
 		
@@ -199,6 +545,16 @@ $(document).ready(function(){
 		current_quiz_state = msg['state'];
 		$("." + quiz_state_to_class_map[current_quiz_state]).removeClass('hidden');
 	});
+	
+	socket.on('competitor_joined', function(msg){
+		console.log('Competitor joined!', msg);
+		get_competitors({{ quiz.id }}, update_competitors);
+	});
+	
+	socket.on('full_answer_received', function(msg) {
+		console.log('Full answer received', msg);
+		$('[cid=' + msg['id'] + ']').find('.dot').removeClass('no-answer').addClass('answered');
+	})
 });
 </script>
 {% endblock %}
