@@ -7,187 +7,232 @@
     {{super()}}
 	<div class="lobby hidden">
 	    <div class="row">
-	        <p>
-	            Welcome, {{ competitor.name }}!  The game will start soon.
-	        </p>
+			<div class="col-md-12">
+		        <p>
+		            Welcome, {{ competitor.name }}!  The game will start soon.
+		        </p>
+			</div>
 	    </div>
 		<div class="row">
-			<h3>Who else is here?</h3>
-			<ul id="competitors">
-			{% for c in quiz.competitors %}
-				{% if c.id != competitor.id %}
-				<li cid="{{ c.id }}">{{ c.name }}</li>
-				{% endif %}
-			{% endfor %}
-			</ul>
+			<div class="col-md-12">			
+				<h3>Who else is here?</h3>
+				<ul id="competitors">
+				{% for c in quiz.competitors %}
+					{% if c.id != competitor.id %}
+					<li cid="{{ c.id }}">{{ c.name }}</li>
+					{% endif %}
+				{% endfor %}
+				</ul>
+			</div>
 		</div>
 	</div>
 	<div class="free-response hidden">
-	    <form action="{{ url_for('quiz.submit_free_response', id=quiz.id ) }}" method="POST">
-	    	<div class="form-group form-inline grape">
-	    	    <label for="grape">Grape</label>
-	    	    <select name="grape" id="grape" class="form-control grape-select" required>
-					<!-- To be filled in by API call -->
-	                <option>Unknown</option>
-	            </select>
-	    	</div>
-	    	<div class="form-group form-inline country">
-	    	    <label for="country">Country</label>
-	    	    <select name="country" id="country" class="form-control country-select" required>
-					<!-- To be filled in by API call -->
-	                <option>Unknown</option>
-	            </select>
-	    	</div>
-	    	<div class="form-group form-inline vintage">
-	    	    <label for="vintage">Vintage</label>
-	    	    <input type="number" name="vintage" id="vintage"
-					class="form-control vintage-input" 
-					value="2022"
-					required/>
-	    	</div>
-	    	<div class="form-group">
-	            <button id="free_submit" type="submit" name="action" value="Submit" class="btn btn-success">Submit</button>
-	    	</div>
-		</form>
+		<div class="row">
+			<div class="col-md-12">
+				<p>
+					This is the free response period. Blind taste the wine, and select the grape,
+					country and vintage that you think match the wine.  You get points for exactly
+					correct answers only.
+				</p>		
+			    <form action="{{ url_for('quiz.submit_free_response', id=quiz.id ) }}" method="POST">
+			    	<div class="form-group form-inline grape">
+			    	    <label for="grape">Grape</label>
+			    	    <select name="grape" id="grape" class="form-control grape-select" required>
+							<!-- To be filled in by API call -->
+			                <option>Unknown</option>
+			            </select>
+			    	</div>
+			    	<div class="form-group form-inline country">
+			    	    <label for="country">Country</label>
+			    	    <select name="country" id="country" class="form-control country-select" required>
+							<!-- To be filled in by API call -->
+			                <option>Unknown</option>
+			            </select>
+			    	</div>
+			    	<div class="form-group form-inline vintage">
+			    	    <label for="vintage">Vintage</label>
+			    	    <input type="number" name="vintage" id="vintage"
+							class="form-control vintage-input" 
+							value="2022"
+							required/>
+			    	</div>
+			    	<div class="form-group">
+			            <button id="free_submit" type="submit" name="action" value="Submit" class="btn btn-success btn-block">
+							<span class="glyphicon glyphicon-ok hidden free-success" aria-hidden="true"></span>
+							Submit
+						</button>
+						<p>
+							<small class="free-success hidden">Answers accepted, you may change them until the end of the round.</small>
+						</p>
+			    	</div>
+				</form>
+			</div>
+		</div>
 	</div>
 	<div class="multiple-choice hidden">
-	    <form action="{{ url_for('quiz.submit_multiple_choice', id=quiz.id ) }}" method="POST">
-	    	<div class="form-group" id="grape_radio">
-				<h3>Grape</h3>
-				<div class="radio">
-				  <label class="grape-radio">
-				    <input type="radio" name="grape" value="grape1">
-				    <span>Grape 1</span>
-				  </label>
-				</div>
-				<div class="radio">
-				  <label class="grape-radio">
-				    <input type="radio" name="grape" value="grape2">
-				    <span>Grape 2</span>
-				  </label>
-				</div>
-				<div class="radio">
-				  <label class="grape-radio">
-				    <input type="radio" name="grape" value="grape3">
-				    <span>Grape 3</span>
-				  </label>
-				</div>
-				<div class="radio">
-				  <label class="grape-radio">
-				    <input type="radio" name="grape" value="grape4">
-				    <span>Grape 4</span>
-				  </label>
-				</div>
+		<div class="row">
+			<div class="col-md-12">
+				<p>
+					This is the multiple choice period. If your free response choices are available,
+					you can pick them again. If one of your choices is not available, then it is time
+					to consider an alternative response. Half points for each correct answer in the
+					multiple choice phase.
+				</p>			
+			    <form action="{{ url_for('quiz.submit_multiple_choice', id=quiz.id ) }}" method="POST">
+			    	<div class="form-group" id="grape_radio">
+						<h3>Grape</h3>
+						<div class="radio">
+						  <label class="grape-radio">
+						    <input type="radio" name="grape" value="grape1">
+						    <span>Grape 1</span>
+						  </label>
+						</div>
+						<div class="radio">
+						  <label class="grape-radio">
+						    <input type="radio" name="grape" value="grape2">
+						    <span>Grape 2</span>
+						  </label>
+						</div>
+						<div class="radio">
+						  <label class="grape-radio">
+						    <input type="radio" name="grape" value="grape3">
+						    <span>Grape 3</span>
+						  </label>
+						</div>
+						<div class="radio">
+						  <label class="grape-radio">
+						    <input type="radio" name="grape" value="grape4">
+						    <span>Grape 4</span>
+						  </label>
+						</div>
+					</div>
+			    	<div class="form-group" id="country_radio">
+						<h3>Country</h3>
+						<div class="radio">
+						  <label class="country-radio">
+						    <input type="radio" name="country" value="country1">
+						    <span>Country 1</span>
+						  </label>
+						</div>
+						<div class="radio">
+						  <label class="country-radio">
+						    <input type="radio" name="country" value="country2">
+						    <span>Country 2</span>
+						  </label>
+						</div>
+						<div class="radio">
+						  <label class="country-radio">
+						    <input type="radio" name="country" value="country3">
+						    <span>Country 3</span>
+						  </label>
+						</div>
+						<div class="radio">
+						  <label class="country-radio">
+						    <input type="radio" name="country" value="country4">
+						    <span>Country 4</span>
+						  </label>
+						</div>
+					</div>
+			    	<div class="form-group" id="vintage_radio">
+						<h3>Vintage</h3>
+						<div class="radio">
+						  <label class="vintage-radio">
+						    <input type="radio" name="vintage" value="vintage1">
+						    <span>Vintage 1</span>
+						  </label>
+						</div>
+						<div class="radio">
+						  <label class="vintage-radio">
+						    <input type="radio" name="vintage" value="vintage2">
+						    <span>Vintage 2</span>
+						  </label>
+						</div>
+						<div class="radio">
+						  <label class="vintage-radio">
+						    <input type="radio" name="vintage" value="vintage3">
+						    <span>Vintage 3</span>
+						  </label>
+						</div>
+						<div class="radio">
+						  <label class="vintage-radio">
+						    <input type="radio" name="vintage" value="vintage4">
+						    <span>Vintage 4</span>
+						  </label>
+						</div>
+					</div>
+			    	<div class="form-group">
+			            <button id="multi_submit" type="submit" name="action" value="Submit" class="btn btn-success btn-block">
+							<span class="glyphicon glyphicon-ok hidden multi-success" aria-hidden="true"></span>
+							Submit
+						</button>
+						<p>
+							<small class="multi-success hidden">Answers accepted, you may change them until the end of the round.</small>
+						</p>
+			    	</div>
+				</form>
 			</div>
-	    	<div class="form-group" id="country_radio">
-				<h3>Country</h3>
-				<div class="radio">
-				  <label class="country-radio">
-				    <input type="radio" name="country" value="country1">
-				    <span>Country 1</span>
-				  </label>
-				</div>
-				<div class="radio">
-				  <label class="country-radio">
-				    <input type="radio" name="country" value="country2">
-				    <span>Country 2</span>
-				  </label>
-				</div>
-				<div class="radio">
-				  <label class="country-radio">
-				    <input type="radio" name="country" value="country3">
-				    <span>Country 3</span>
-				  </label>
-				</div>
-				<div class="radio">
-				  <label class="country-radio">
-				    <input type="radio" name="country" value="country4">
-				    <span>Country 4</span>
-				  </label>
-				</div>
-			</div>
-	    	<div class="form-group" id="vintage_radio">
-				<h3>Vintage</h3>
-				<div class="radio">
-				  <label class="vintage-radio">
-				    <input type="radio" name="vintage" value="vintage1">
-				    <span>Vintage 1</span>
-				  </label>
-				</div>
-				<div class="radio">
-				  <label class="vintage-radio">
-				    <input type="radio" name="vintage" value="vintage2">
-				    <span>Vintage 2</span>
-				  </label>
-				</div>
-				<div class="radio">
-				  <label class="vintage-radio">
-				    <input type="radio" name="vintage" value="vintage3">
-				    <span>Vintage 3</span>
-				  </label>
-				</div>
-				<div class="radio">
-				  <label class="vintage-radio">
-				    <input type="radio" name="vintage" value="vintage4">
-				    <span>Vintage 4</span>
-				  </label>
-				</div>
-			</div>
-	    	<div class="form-group">
-	            <button id="multi_submit" type="submit" name="action" value="Submit" class="btn btn-success">Submit</button>
-	    	</div>
-		</form>
-				
-		
+		</div>
 	</div>
 	<div class="question-recap hidden">
 		<!--
 		<div class="row">
-			<h3>The Correct Answers</h3>
-			<p>
-				Were you right?
-			</p>
-			<p>
-				<small>Grape</small><br/>
-				<b><span id="correct_grape">Unknown</span></b>
-			</p>
-			<p>
-				<small>Country</small><br/>
-				<b><span id="correct_country">Unknown</span></b>
-			</p>
-			<p>
-				<small>Vintage</small><br/>
-				<b><span id="correct_vintage">Unknown</span></b>
-			</p>
+			<div class="col-md-12">			
+				<h3>The Correct Answers</h3>
+				<p>
+					Were you right?
+				</p>
+				<p>
+					<small>Grape</small><br/>
+					<b><span id="correct_grape">Unknown</span></b>
+				</p>
+				<p>
+					<small>Country</small><br/>
+					<b><span id="correct_country">Unknown</span></b>
+				</p>
+				<p>
+					<small>Vintage</small><br/>
+					<b><span id="correct_vintage">Unknown</span></b>
+				</p>
+			</div>
 		</div>
 		-->
 		<div class="row">
-			<h3>Question Leaderboard</h3>
-	        <table class="table">
-	            <thead>
-	                <tr>
-	                    <th>Name</th>
-	                    <th>Score</th>
-	                </tr>
-	            </thead>
-	            <tbody id="question_scoreboard">
-	            </tbody>
-	        </table>
+			<div class="col-md-12">
+				<h3>How did you do on this wine?</h3>
+				<p>
+					Correct answers will be revealed at the end of the competition.
+				</p>
+				<p>
+					Points shown here are just for this wine, not the overall competition.
+				</p>
+		        <table class="table">
+		            <thead>
+		                <tr>
+		                    <th>Name</th>
+		                    <th>Score</th>
+		                </tr>
+		            </thead>
+		            <tbody id="question_scoreboard">
+		            </tbody>
+		        </table>
+			</div>
 		</div>
 	</div>
 	<div class="quiz-recap hidden">
 		<div class="row">
-			<h3>Final Leaderboard</h3>
-	        <table class="table">
-	            <thead>
-	                <tr>
-	                    <th>Name</th>
-	                    <th>Score</th>
-	                </tr>
-	            </thead>
-	            <tbody id="final_scoreboard">
-	            </tbody>
-	        </table>
+			<div class="col-md-12">
+				<h3>Final Leaderboard</h3>
+		        <table class="table">
+		            <thead>
+		                <tr>
+		                    <th>Name</th>
+		                    <th>Score</th>
+		                </tr>
+		            </thead>
+		            <tbody id="final_scoreboard">
+		            </tbody>
+		        </table>
+			</div>
 		</div>
 	</div>
 </div>
@@ -301,7 +346,8 @@ function submit_free_response() {
 	    dataType: 'json',
 	    async: true,
 	    success: function(msg) {
-	        console.log('free response answers submitted successfully')
+	        console.log('free response answers submitted successfully');
+			$('.free-success').removeClass('hidden');
 	    },
 		error: function() {
 			console.log('error submitting free response');
@@ -326,7 +372,8 @@ function submit_multiple_choice() {
 	    dataType: 'json',
 	    async: true,
 	    success: function(msg) {
-	        console.log('multiple choice answers submitted successfully')
+	        console.log('multiple choice answers submitted successfully');
+			$('.multi-success').removeClass('hidden');
 	    },
 		error: function() {
 			console.log('error submitting multiple choice');
@@ -373,12 +420,14 @@ function reset_free_response() {
 	$('#grape').val(-1);
 	$('#country').val(-1);
 	$('#vintage').val(2022);
+	$('.free-success').addClass('hidden');
 }
 
 function reset_multi_choice() {
 	$('#grape_radio').find('input:checked').prop('checked', false);
 	$('#country_radio').find('input:checked').prop('checked', false);
 	$('#vintage_radio').find('input:checked').prop('checked', false);
+	$('.multi-success').addClass('hidden');
 }
 
 $(document).ready(function(){

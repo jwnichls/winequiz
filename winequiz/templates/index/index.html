@@ -6,31 +6,39 @@
 <div class="container">
     {{super()}}
     <div class="row">
-        <p>
-            Welcome to the Wine Quiz!
-        </p>
+		<div class="col-md-12">
+	        <p>
+	            Welcome to the<b>wine</b>competition!
+	        </p>
+		</div>
     </div>
 	<div class="row">
-		{% if quizes|count == 0 %}
-		<p>
-			Unfortunately, there are no quizes ready to start right now.
-		</p>
-		{% else %}
-		<p>
-			Here are the quizes ready to start now:
-		</p>
-		<ul>
-			{% for quiz in quizes %}
-			<li>
-				{{ quiz.name }}
-				<a href="{{ url_for('quiz.join_quiz', id=quiz.id) }}">
-					<button id="next" class="btn btn-success">Join</button>
-				</a>
-			</li>
-			{% endfor %}
-		</ul>
-		{% endif %}
+		<div class="col-md-12">
+			{% if quizes|count == 0 %}
+			<p>
+				Unfortunately, there are no competitions ready to start right now.
+			</p>
+			{% else %}
+			<p>
+				Here are the competitions ready to start now:
+			</p>
+			{% endif %}
+		</div>
 	</div>
+	{% for quiz in quizes %}
+	<div class="row">
+		<div class="col-md-12">
+			<p class="quiz-title">
+				{{ quiz.name }}
+			</p>
+			<p>
+				<a href="{{ url_for('quiz.join_quiz', id=quiz.id) }}">
+					<button id="next" class="btn btn-success btn-block">Join</button>
+				</a>
+			</p>
+		</div>
+	</div>
+	{% endfor %}
 </div>
 {% endblock %}
 

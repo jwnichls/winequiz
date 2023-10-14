@@ -6,26 +6,29 @@
 <div class="container">
     {{super()}}
     <div class="row">
-        <p>
-            Welcome to the Wine Quiz!
-        </p>
-    </div>
-	<div>
-		<p>
-			The quiz is currently in state "<span id="quizstate">{{ quiz.state }}</span>".
-		</p>
+		<div class="col-md-12">
+			<p>
+				The quiz is currently in state "<span id="quizstate">{{ quiz.state }}</span>".
+			</p>
+		</div>
 	</div>
 	<div class="row">
-        <button id="reverse" class="btn btn-danger">Reverse</button>
-        <button id="next" class="btn btn-success">Next</button>
+		<div class="col-md-6">
+			<button id="reverse" class="btn btn-danger btn-block">Reverse</button>
+		</div>
+		<div class="col-md-6">
+			<button id="next" class="btn btn-success btn-block">Next</button>
+		</div>
 	</div>
 	<div class="row">
-		<h2>Competitors</h2>
-		<ul id="competitors">
-		{% for competitor in quiz.competitors %}
-			<li cid="{{ competitor.id }}">{{ competitor.name }}</li>
-		{% endfor %}
-		</ul>
+		<div class="col-md-12">
+			<h2>Competitors</h2>
+			<ul id="competitors">
+			{% for competitor in quiz.competitors %}
+				<li cid="{{ competitor.id }}">{{ competitor.name }}</li>
+			{% endfor %}
+			</ul>
+		</div>
 	</div>
 </div>
 {% endblock %}
