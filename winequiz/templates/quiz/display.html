@@ -21,9 +21,7 @@
 				<h3>Who else is here?</h3>
 				<ul id="competitors">
 				{% for c in quiz.competitors %}
-					{% if c.id != competitor.id %}
 					<li cid="{{ c.id }}">{{ c.name }}</li>
-					{% endif %}
 				{% endfor %}
 				</ul>
 			</div>
@@ -146,6 +144,13 @@ function fill_in_scoreboard(elem_selector, score_array) {
 	}
 }
 
+function set_correct_answers(grape_id, country_id, vintage) {
+	console.log('set_correct_answer',grape_id,country_id,vintage);
+	$('#correct_grape').text(getNameForId(_grapes, grape_id));
+	$('#correct_country').text(getNameForId(_countries, country_id));
+	$('#correct_vintage').text(vintage);
+}
+
 $(document).ready(function(){
 	// Load the grapes and countries
 	get_grapes(function(grapes) {});
@@ -161,6 +166,10 @@ $(document).ready(function(){
 
 	socket.on('after_connect', function(msg){
 		console.log('Connected!', msg);
+		socket.emit('join', {
+			'room': quizRoomName,
+			'competitor': -1 // Moderator
+		});
 	});
 
 	socket.on('disconnect', function (data) {
