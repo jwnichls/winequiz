@@ -231,6 +231,16 @@ def create_player(id):
     return response
 
 
+@bp.route("/<int:id>/display", methods=["GET"])
+def start_display(id):
+    """
+    Show the large display interface for a quiz
+    """
+    quiz = Quiz.query.filter_by(id=id).first()    
+    
+    return render_template("quiz/display.html", quiz=quiz)
+
+
 @bp.route("/<int:id>/player", methods=["GET"])
 def start_player(id):
     """
@@ -280,9 +290,12 @@ def submit_answer(competitor, quiz, json_data, free_response=True):
         answer.grape_id = grape_id
         answer.country_id = country_id
         answer.vintage = vintage
-        
+    
     db.session.add(answer)
     db.session.commit()
+    
+    if grape_id is not None and country_id is not None and vintage is not None:
+        emit('full_answer_received', {'id': competitor.id, 'name': competitor.name}, room=f'quiz{quiz.id}')
     
     return {'success': True}
 

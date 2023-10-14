@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+{% block header %}
+<h1>{% block title %}The {{ quiz.name }} Quiz!{% endblock %}</h1>
+{% endblock %}
+{% block content %}
+<div class="container">
+    {{super()}}
+	<div class="lobby hidden">
+	    <div class="row">
+			<div class="col-md-12" style="text-align: center;">
+		        <h1>
+		            Welcome!
+				</h1>
+				<p>
+					The game will start soon.
+				</p>
+			</div>
+	    </div>
+		<div class="row">
+			<div class="col-md-12">			
+				<h3>Who else is here?</h3>
+				<ul id="competitors">
+				{% for c in quiz.competitors %}
+					{% if c.id != competitor.id %}
+					<li cid="{{ c.id }}">{{ c.name }}</li>
+					{% endif %}
+				{% endfor %}
+				</ul>
+			</div>
+		</div>
+	</div>
+	<div class="free-response hidden">
+		<div class="row">
+			<div class="col-md-12">
+				<!-- TODO: Show who has answered -->
+			</div>
+		</div>
+	</div>
+	<div class="multiple-choice hidden">
+		<div class="row">
+			<div class="col-md-12">
+				<!-- TODO: Show who has answered -->
+			</div>
+		</div>
+	</div>
+	<div class="question-recap hidden">
+		<!--
+		<div class="row">
+			<div class="col-md-12">			
+				<h3>The Correct Answers</h3>
+				<p>
+					Were you right?
+				</p>
+				<p>
+					<small>Grape</small><br/>
+					<b><span id="correct_grape">Unknown</span></b>
+				</p>
+				<p>
+					<small>Country</small><br/>
+					<b><span id="correct_country">Unknown</span></b>
+				</p>
+				<p>
+					<small>Vintage</small><br/>
+					<b><span id="correct_vintage">Unknown</span></b>
+				</p>
+			</div>
+		</div>
+		-->
+		<div class="row">
+			<div class="col-md-12">
+				<h3>How did you do on this wine?</h3>
+				<p>
+					Correct answers will be revealed at the end of the competition.
+				</p>
+				<p>
+					Points shown here are just for this wine, not the overall competition.
+				</p>
+		        <table class="table">
+		            <thead>
+		                <tr>
+		                    <th>Name</th>
+		                    <th>Score</th>
+		                </tr>
+		            </thead>
+		            <tbody id="question_scoreboard">
+		            </tbody>
+		        </table>
+			</div>
+		</div>
+	</div>
+	<div class="quiz-recap hidden">
+		<div class="row">
+			<div class="col-md-12">
+				<h3>Final Leaderboard</h3>
+		        <table class="table">
+		            <thead>
+		                <tr>
+		                    <th>Name</th>
+		                    <th>Score</th>
+		                </tr>
+		            </thead>
+		            <tbody id="final_scoreboard">
+		            </tbody>
+		        </table>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{super()}}
+<script>
+var _grapes = [];
+var _countries = [];
+	
+var quiz_state_to_class_map = [
+	'none', 
+	'lobby', 
+	'free-response', 
+	'multiple-choice', 
+	'question-recap', 
+	'quiz-recap'];
+	
+var current_quiz_state = {{ quiz.state._value_ }};
+
+function getNameForId(objList, id) {
+	for (oIdx in objList) {
+		if (id == objList[oIdx]['id']) {
+			return objList[oIdx]['name'];
+		}
+	}
+	
+	return 'Unknown';
+}
+
+function fill_in_scoreboard(elem_selector, score_array) {
+	$(elem_selector).empty()
+	for (sIdx in score_array) {
+		$(elem_selector).append(
+			$('<tr><td>' + 
+			  score_array[sIdx]['name'] + 
+			  '</td><td>' + 
+			  score_array[sIdx]['score'] + 
+			  '</td></tr>'));
+	}
+}
+
+$(document).ready(function(){
+	// Load the grapes and countries
+	get_grapes(function(grapes) {});
+	get_countries(function(countries) {});
+		
+	// sending a connect request to the server.
+	var socket = io.connect({ transports : ['websocket'] });
+	var quizRoomName = "quiz{{ quiz.id }}";
+	
+	socket.on("connect_error", function(err){
+		console.log(`connect_error due to ${err.message}`);
+	});
+
+	socket.on('after_connect', function(msg){
+		console.log('Connected!', msg);
+	});
+
+	socket.on('disconnect', function (data) {
+		console.log('disconnecting');
+	});
+
+
+	// MESSAGES TO HANDLE:
+	
+	socket.on('quiz_state_changed', function(msg){
+		console.log('Quiz state changed!', msg);
+		// update any particular screens
+		/*
+		if (msg['state'] == 2) { // free response section
+			// Filter the grapes to the correct color
+		} else if (msg['state'] == 3) { // multiple choice
+		} else */
+		if (msg['state'] == 4) { // question recap
+			set_correct_answers(msg['correct_grape'], msg['correct_country'], msg['correct_vintage']);
+			fill_in_scoreboard('#question_scoreboard', msg['scores'])
+		} else if (msg['state'] == 5) { // quiz recap
+			fill_in_scoreboard('#final_scoreboard', msg['final_scores'])			
+		}
+		
+		// update the major portion of the interface
+		$("." + quiz_state_to_class_map[current_quiz_state]).addClass('hidden');
+		current_quiz_state = msg['state'];
+		$("." + quiz_state_to_class_map[current_quiz_state]).removeClass('hidden');
+	});
+});
+</script>
+{% endblock %}
