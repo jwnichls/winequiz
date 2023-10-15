@@ -8,6 +8,9 @@
 	<div class="row">
 		<div class="col-md-12">
 			<h3>Grapes</h3>
+			<p>
+				Correct Answer: <b grape_id="{{ item.grape_id }}"></b>
+			</p>
 			<div>
 				<canvas id="grape_breakdown"></canvas>
 			</div>
@@ -16,6 +19,9 @@
 	<div class="row">
 		<div class="col-md-12">
 			<h3>Countries</h3>
+			<p>
+				Correct Answer: <b country_id="{{ item.country_id }}"></b>
+			</p>
 			<div>
 				<canvas id="country_breakdown"></canvas>
 			</div>
@@ -24,6 +30,9 @@
 	<div class="row">
 		<div class="col-md-12">
 			<h3>Vintages</h3>
+			<p>
+				Correct Answer: <b>{{ item.vintage }}</b>
+			</p>
 			<div>
 				<canvas id="vintage_breakdown"></canvas>
 			</div>
@@ -157,8 +166,30 @@ var stats = {{ stats|tojson|safe }};
 
 $(document).ready(function(){
 	// Load the grapes and countries
-	get_grapes(function(grapes) { generate_grape_graph(stats); });
-	get_countries(function(countries) { generate_country_graph(stats); });
+	get_grapes(function(grapes) { 
+		generate_grape_graph(stats); 
+		$('[grape_id]').each(function(idx, elem) {
+			var grape_id = $(elem).attr('grape_id');
+			for (i = 0; i < grapes.length; i++) {
+				if (grapes[i]['id'] == grape_id) {
+					$(elem).text(grapes[i]['name']);
+					break;
+				}
+			}
+		});
+	});
+	get_countries(function(countries) { 
+		generate_country_graph(stats); 
+		$('[country_id]').each(function(idx, elem) {
+			var country_id = $(elem).attr('country_id');
+			for (i = 0; i < countries.length; i++) {
+				if (countries[i]['id'] == country_id) {
+					$(elem).text(countries[i]['name']);
+					break;
+				}
+			}
+		});
+	});
 	
 	const grape_chart_elem = document.getElementById('grape_breakdown');
 	grape_chart = new Chart(grape_chart_elem, {
