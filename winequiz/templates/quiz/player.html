@@ -474,6 +474,10 @@ $(document).ready(function(){
 	
 	socket.on('quiz_state_changed', function(msg){
 		console.log('Quiz state changed!', msg);
+		if (msg['state'] == current_quiz_state) {
+			return;
+		}
+		
 		// update any particular screens
 		if (msg['state'] == 2) { // free response section
 			// Filter the grapes to the correct color
