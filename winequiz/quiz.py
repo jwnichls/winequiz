@@ -447,6 +447,10 @@ def rescore(id):
     """
     Rescore the quiz
     """
+    quiz = Quiz.query.filter_by(id=id).first()
+    if quiz is None:
+        abort(404, 'No such quiz')
+        
     calculate_total_points(quiz)
     
     return redirect(url_for('quiz.show_leaderboard', id=quiz.id))
