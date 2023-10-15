@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+{% block header %}
+<h1>Stats for Answer</h1>
+{% endblock %}
+{% block content %}
+<div class="container">
+    {{super()}}
+	<div class="row">
+		<div class="col-md-12">
+			<h3>Grapes</h3>
+			<div>
+				<canvas id="grape_breakdown"></canvas>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-12">
+			<h3>Countries</h3>
+			<div>
+				<canvas id="country_breakdown"></canvas>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-12">
+			<h3>Vintages</h3>
+			<div>
+				<canvas id="vintage_breakdown"></canvas>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{super()}}
+<script>
+var _grapes = [];
+var _countries = [];
+
+var grape_chart = null;
+var country_chart = null;
+var vintage_chart = null;
+
+function getNameForId(objList, id) {
+	for (oIdx in objList) {
+		if (id == objList[oIdx]['id']) {
+			return objList[oIdx]['name'];
+		}
+	}
+	
+	return 'Unknown';
+}
+
+function create_datasets(stats, list, listName) {
+	names = []
+	freeResponseCounts = []
+	multiResponseCounts = []
+
+	for (idx in list) {
+		oId = list[idx]['id'];
+		oName = list[idx]['name'];
+		
+		frc = stats['free_response'][listName][oId];
+		mrc = stats['multiple_choice'][listName][oId];
+		
+		if (frc == undefined && mrc == undefined) continue;
+		
+		if (frc == undefined) frc = 0;
+		if (mrc == undefined) mrc = 0;
+		
+		names.push(oName);
+		freeResponseCounts.push(frc);
+		multiResponseCounts.push(mrc);
+	}
+	
+	return {
+		labels: names,
+		datasets: [{
+			label: 'Free Response',
+			data: freeResponseCounts,
+			borderWidth: 1
+		}, {
+			label: 'Multiple Choice',
+			data: multiResponseCounts,
+			borderWidth: 1
+		}]
+	};
+}
+
+
+function create_vintage_dataset(stats) {
+	names = []
+	freeResponseCounts = []
+	multiResponseCounts = []
+
+	freeVintages = Object.keys(stats['free_response']['vintages'])
+	multiVintages = Object.keys(stats['multiple_choice']['vintages'])
+	for (fIdx in freeVintages) {
+		vintage = freeVintages[fIdx];
+		if (names.indexOf(vintage) < 0) {
+			names.push(vintage);
+		}
+	}
+	for (mIdx in multiVintages) {
+		vintage = multiVintages[mIdx];
+		if (names.indexOf(vintage) < 0) {
+			names.push(vintage);
+		}
+	}
+	
+	names.sort();
+	for (nIdx in names) {
+		frc = stats['free_response']['vintages'][names[nIdx]];
+		mrc = stats['multiple_choice']['vintages'][names[nIdx]];
+		
+		if (frc == undefined) frc = 0;
+		if (mrc == undefined) mrc = 0;
+		
+		freeResponseCounts.push(frc);
+		multiResponseCounts.push(mrc);
+	}
+
+	return {
+		labels: names,
+		datasets: [{
+			label: 'Free Response',
+			data: freeResponseCounts,
+			borderWidth: 1
+		}, {
+			label: 'Multiple Choice',
+			data: multiResponseCounts,
+			borderWidth: 1
+		}]
+	};	
+}
+
+function generate_grape_graph(stats) {
+	grape_dataset = create_datasets(stats, _grapes, 'grapes');	
+	grape_chart.data = grape_dataset;
+	grape_chart.update();
+}
+
+function generate_country_graph(stats) {
+	country_dataset = create_datasets(stats, _countries, 'countries');	
+	country_chart.data = country_dataset;
+	country_chart.update();
+}
+
+function generate_vintage_graph(stats) {
+	vintage_dataset = create_vintage_dataset(stats);
+	vintage_chart.data = vintage_dataset;
+	vintage_chart.update();
+}
+
+var stats = {{ stats|tojson|safe }};
+
+$(document).ready(function(){
+	// Load the grapes and countries
+	get_grapes(function(grapes) { generate_grape_graph(stats); });
+	get_countries(function(countries) { generate_country_graph(stats); });
+	
+	const grape_chart_elem = document.getElementById('grape_breakdown');
+	grape_chart = new Chart(grape_chart_elem, {
+		type: 'bar',
+		data: [],
+		options: {
+			indexAxis: 'y',
+			elements: {
+				bar: {
+			        borderWidth: 1,
+			    }
+			},
+		}
+	});
+
+	const country_chart_elem = document.getElementById('country_breakdown');
+	country_chart = new Chart(country_chart_elem, {
+		type: 'bar',
+		data: [],
+		options: {
+			indexAxis: 'y',
+			elements: {
+				bar: {
+			        borderWidth: 1,
+			    }
+			},
+		}
+	});
+	
+	const vintage_chart_elem = document.getElementById('vintage_breakdown');
+	vintage_chart = new Chart(vintage_chart_elem, {
+		type: 'bar',
+		data: [],
+		options: {
+			indexAxis: 'y',
+			elements: {
+				bar: {
+			        borderWidth: 1,
+			    }
+			},
+		}
+	});
+	
+	generate_vintage_graph(stats);
+});
+</script>
+{% endblock %}
