@@ -8,7 +8,11 @@
 	<div class="row">
 		<div class="col-md-12">
 			{% for wine in wines %}
-			<h3>Wine #{{ wine['wine_idx'] }}</h3>
+			<h3>
+				<a href="{{ url_for('quiz.show_answer_stats', id=quiz.id, aid=wine['item_id']) }}">
+					Wine #{{ wine['wine_idx'] }}
+				</a>
+			</h3>
 			<p>
 				Total points: <b>{{ competitor.points }}</b>
 			</p>

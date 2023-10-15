@@ -474,6 +474,7 @@ def show_breakdown(id, cid):
     for item in quiz.items:
         wine = {
             'wine_idx': wine_counter,
+            'item_id': item.id,
             'grape_id': item.grape_id,
             'country_id': item.country_id,
             'vintage': item.vintage,
@@ -510,6 +511,22 @@ def show_breakdown(id, cid):
 
     
     return render_template("quiz/breakdown.html", quiz=quiz, competitor=competitor, wines=wines)
+
+
+@bp.route("/<int:id>/answer/<int:aid>/stats", methods=["GET"])
+def show_answer_stats(id, aid):
+    """
+    Display stats for an individual answer
+    """
+    quiz = Quiz.query.filter_by(id=id).first()
+    quiz_item = QuizItem.query.filter_by(id=aid).first()
+    
+    if quiz is None or quiz_item is None or quiz_item.quiz_id != quiz.id:
+        abort(404, 'No such quiz or answer')
+    
+    stats = get_stats_for_item(quiz, quiz_item)
+    
+    return render_template("quiz/answerstats.html", quiz=quiz, item=quiz_item, stats=stats)
 
 
 @bp.route("/<int:id>/competitors", methods=["GET"])
