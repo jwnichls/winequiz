@@ -131,7 +131,7 @@ def calculate_total_points(quiz):
         overall_scores = sum_score_hashes(overall_scores, item_score_hash)
         
     for competitor in quiz.competitors:
-        competitor.score = overall_scores.get(competitor.id, 0)
+        competitor.points = overall_scores.get(competitor.id, 0)
         db.session.add(competitor)
         
     db.session.commit()

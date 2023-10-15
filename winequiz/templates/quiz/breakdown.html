@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% block header %}
+<h1>{% block title %}Final Score Breakdown for {{ competitor.name }}{% endblock %}</h1>
+{% endblock %}
+{% block content %}
+<div class="container">
+    {{super()}}	
+	<div class="row">
+		<div class="col-md-12">
+			{% for wine in wines %}
+			<h3>Wine #{{ wine['wine_idx'] }}</h3>
+	        <table class="table">
+	            <thead>
+	                <tr>
+						<th></th>
+	                    <th>Free Response</th>
+	                    <th>Multiple Choice</th>
+						<th>Actual</th>
+						<th>Points</th>
+	                </tr>
+	            </thead>
+	            <tbody>
+					<tr>
+						<td><b>Grape</b></td>
+						<td>
+							<span grape_id="{{ wine['fr_grape_id'] }}">Unknown</span>
+							{% if wine['fr_grape_id'] == wine['grape_id'] %}
+							<span class="glyphicon glyphicon-ok"></span>
+							{% endif %}
+						</td> 
+						<td>
+							<span grape_id="{{ wine['mr_grape_id'] }}">Unknown</span>
+							{% if wine['mr_grape_id'] == wine['grape_id'] %}
+							<span class="glyphicon glyphicon-ok"></span>
+							{% endif %}
+						</td>
+						<td grape_id="{{ wine['grape_id'] }}">Unknown</td>
+						<td>{{ wine['grape_points'] }}</td>
+					</tr>
+					<tr>
+						<td><b>Country</b></td>
+						<td>
+							<span country_id="{{ wine['fr_country_id'] }}">Unknown</span>
+							{% if wine['fr_country_id'] == wine['country_id'] %}
+							<span class="glyphicon glyphicon-ok"></span>
+							{% endif %}
+						</td> 
+						<td>
+							<span country_id="{{ wine['mr_country_id'] }}">Unknown</span>
+							{% if wine['mr_country_id'] == wine['country_id'] %}
+							<span class="glyphicon glyphicon-ok"></span>
+							{% endif %}
+						</td>
+						<td country_id="{{ wine['country_id'] }}">Unknown</td>
+						<td>{{ wine['country_points'] }}</td>
+					</tr>
+					<tr>
+						<td><b>Vintage</b></td>
+						<td>
+							<span>{{ wine['fr_vintage'] }}</span>
+							{% if wine['fr_vintage'] == wine['vintage'] %}
+							<span class="glyphicon glyphicon-ok"></span>
+							{% endif %}
+						</td> 
+						<td>
+							<span>{{ wine['mr_vintage'] }}</span>
+							{% if wine['mr_vintage'] == wine['vintage'] %}
+							<span class="glyphicon glyphicon-ok"></span>
+							{% endif %}
+						</td>
+						<td>{{ wine['vintage'] }}</td>
+						<td>{{ wine['vintage_points'] }}</td>
+					</tr>
+	            </tbody>
+	        </table>
+			{% endfor %}
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{super()}}
+<script>
+var _grapes = [];
+var _countries = [];
+
+$(document).ready(function(){
+	// Load the grapes and countries
+	get_grapes(function(grapes) {
+		$('[grape_id]').each(function(idx, elem) {
+			var grape_id = $(elem).attr('grape_id');
+			for (i = 0; i < grapes.length; i++) {
+				if (grapes[i]['id'] == grape_id) {
+					$(elem).text(grapes[i]['name']);
+					break;
+				}
+			}
+		});
+	});
+	
+	get_countries(function(countries) {
+		$('[country_id]').each(function(idx, elem) {
+			var country_id = $(elem).attr('country_id');
+			for (i = 0; i < countries.length; i++) {
+				if (countries[i]['id'] == country_id) {
+					$(elem).text(countries[i]['name']);
+					break;
+				}
+			}
+		});
+	});
+});
+</script>
+{% endblock %}

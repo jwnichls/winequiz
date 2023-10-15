@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block header %}
+<h1>{% block title %}The {{ quiz.name }} Final Leaderboard{% endblock %}</h1>
+{% endblock %}
+{% block content %}
+<div class="container">
+    {{super()}}	
+	<div class="row">
+		<div class="col-md-12">
+			<h3>Final Leaderboard</h3>
+	        <table class="table">
+	            <thead>
+	                <tr>
+	                    <th>Name</th>
+	                    <th>Score</th>
+	                </tr>
+	            </thead>
+	            <tbody id="final_scoreboard">
+					{% for competitor in competitors %}
+					<tr>
+						<td><a href="{{ url_for('quiz.show_breakdown', id=quiz.id, cid=competitor.id)}}">{{ competitor.name }}</a></td>
+						<td>{{ competitor.points }}</td>
+					</tr>
+					{% endfor %}
+	            </tbody>
+	        </table>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{super()}}
+{% endblock %}

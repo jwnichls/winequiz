@@ -2,6 +2,7 @@
 The quiz pages
 """
 
+from operator import attrgetter
 import random
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for
@@ -23,6 +24,8 @@ from winequiz.scoring import (
     calculate_total_points,
     convert_to_competitor_hash,
     get_stats_for_item,
+    FREE_RESPONSE_CORRECT,
+    MULTIPLE_CHOICE_CORRECT,
 )
 
 from . import socketio
@@ -398,6 +401,76 @@ def start_moderator(id):
         abort(401, 'Unauthorized')
     
     return render_template("quiz/moderator.html", quiz=quiz)
+
+
+@bp.route("/<int:id>/leaderboard", methods=["GET"])
+def show_leaderboard(id):
+    """
+    Show the leaderboard
+    """
+    quiz = Quiz.query.filter_by(id=id).first()
+    if quiz is None:
+        abort(404, 'Quiz does not exist')
+
+    leaders = sorted(quiz.competitors, key=attrgetter('points'), reverse=True)
+    
+    return render_template("quiz/leaderboard.html", quiz=quiz, competitors=leaders)
+
+
+@bp.route("/<int:id>/competitor/<int:cid>/breakdown", methods=["GET"])
+def show_breakdown(id, cid):
+    """
+    Show the leaderboard
+    """
+    quiz = Quiz.query.filter_by(id=id).first()
+    competitor = Competitor.query.filter_by(id=cid).first()
+    
+    if quiz is None or competitor is None:
+        abort(404, 'Quiz or competitor does not exist')
+    
+    answers = Answer.query.filter_by(quiz_id=quiz.id, competitor_id=competitor.id).all()
+    
+    wines = []
+    wine_counter = 1
+    for item in quiz.items:
+        wine = {
+            'wine_idx': wine_counter,
+            'grape_id': item.grape_id,
+            'country_id': item.country_id,
+            'vintage': item.vintage,
+            'grape_points': 0,
+            'country_points': 0,
+            'vintage_points': 0,
+        }
+        wine_counter += 1
+
+        for answer in answers:
+            if answer.quiz_item_id == item.id:
+                if answer.free_response == True:
+                    wine['fr_grape_id'] = answer.grape_id
+                    if item.grape_id == answer.grape_id:
+                        wine['grape_points'] += FREE_RESPONSE_CORRECT
+                    wine['fr_country_id'] = answer.country_id
+                    if item.country_id == answer.country_id:
+                        wine['country_points'] += FREE_RESPONSE_CORRECT
+                    wine['fr_vintage'] = answer.vintage
+                    if item.vintage == answer.vintage:
+                        wine['vintage_points'] += FREE_RESPONSE_CORRECT
+                else:
+                    wine['mr_grape_id'] = answer.grape_id
+                    if item.grape_id == answer.grape_id:
+                        wine['grape_points'] += MULTIPLE_CHOICE_CORRECT
+                    wine['mr_country_id'] = answer.country_id
+                    if item.country_id == answer.country_id:
+                        wine['country_points'] += MULTIPLE_CHOICE_CORRECT
+                    wine['mr_vintage'] = answer.vintage
+                    if item.vintage == answer.vintage:
+                        wine['vintage_points'] += MULTIPLE_CHOICE_CORRECT
+                    
+        wines.append(wine)
+
+    
+    return render_template("quiz/breakdown.html", quiz=quiz, competitor=competitor, wines=wines)
 
 
 @bp.route("/<int:id>/competitors", methods=["GET"])
