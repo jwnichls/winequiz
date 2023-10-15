@@ -417,6 +417,41 @@ def show_leaderboard(id):
     return render_template("quiz/leaderboard.html", quiz=quiz, competitors=leaders)
 
 
+@bp.route("/<int:id>/merge/<int:c_dup_id>/to/<int:c_main_id>", methods=["GET"])
+def merge_competitors(id, c_dup_id, c_main_id):
+    """
+    Show the leaderboard
+    """
+    db = get_db()
+    
+    quiz = Quiz.query.filter_by(id=id).first()
+    main_competitor = Competitor.query.filter_by(id=c_main_id).first()
+    merging_competitor = Competitor.query.filter_by(id=c_dup_id).first()
+    
+    if quiz is None or main_competitor is None or merging_competitor is None:
+        abort(404, 'Quiz or competitors do not exist')
+    
+    answers_to_merge = Answer.query.filter_by(competitor_id=c_dup_id).all()
+    for answer in answers_to_merge:
+        answer.competitor_id = main_competitor.id
+        db.session.add(answer)
+    
+    db.session.delete(merging_competitor)
+    db.session.commit()
+    
+    return redirect(url_for('quiz.show_leaderboard', id=quiz.id))
+
+
+@bp.route("/<int:id>/rescore", methods=["GET"])
+def rescore(id):
+    """
+    Rescore the quiz
+    """
+    calculate_total_points(quiz)
+    
+    return redirect(url_for('quiz.show_leaderboard', id=quiz.id))
+    
+
 @bp.route("/<int:id>/competitor/<int:cid>/breakdown", methods=["GET"])
 def show_breakdown(id, cid):
     """
