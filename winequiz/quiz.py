@@ -130,8 +130,8 @@ def get_quiz_state(quiz):
         grapes = [item.grape_id, item.grape_alternate_one, item.grape_alternate_two, item.grape_alternate_three]
         countries = [item.country_id, item.country_alternate_one, item.country_alternate_two, item.country_alternate_three]
         vintages = [item.vintage, item.vintage_alternate_one, item.vintage_alternate_two, item.vintage_alternate_three]
-        random.shuffle(grapes)
-        random.shuffle(countries)
+        grapes.sort()
+        countries.sort()
         vintages.sort()
         json_data['grapes'] = grapes
         json_data['countries'] = countries
