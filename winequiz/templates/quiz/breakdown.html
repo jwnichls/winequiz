@@ -9,6 +9,9 @@
 		<div class="col-md-12">
 			{% for wine in wines %}
 			<h3>Wine #{{ wine['wine_idx'] }}</h3>
+			<p>
+				Total points: <b>{{ competitor.points }}</b>
+			</p>
 	        <table class="table">
 	            <thead>
 	                <tr>
@@ -70,6 +73,13 @@
 						</td>
 						<td>{{ wine['vintage'] }}</td>
 						<td>{{ wine['vintage_points'] }}</td>
+					</tr>
+					<tr>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td><b>Total</b></td>
+						<td>{{ wine['grape_points'] + wine['country_points'] + wine['vintage_points'] }}</td>
 					</tr>
 	            </tbody>
 	        </table>
