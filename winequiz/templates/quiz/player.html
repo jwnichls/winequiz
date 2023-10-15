@@ -251,7 +251,8 @@ var quiz_state_to_class_map = [
 	'multiple-choice', 
 	'question-recap', 
 	'quiz-recap'];
-	
+
+var first_load = true;	
 var current_quiz_state = {{ quiz.state._value_ }};
 
 function set_grape_selections(grape_color) {
@@ -473,10 +474,11 @@ $(document).ready(function(){
 	// MESSAGES TO HANDLE:
 	
 	socket.on('quiz_state_changed', function(msg){
-		if (msg['state'] == current_quiz_state) {
+		if (msg['state'] == current_quiz_state && !first_load) {
 			console.log('should not reset')
 			return;
 		}
+		first_load = true;
 		console.log('Quiz state changed!', msg);
 		
 		// update any particular screens
