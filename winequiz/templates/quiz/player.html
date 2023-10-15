@@ -473,10 +473,11 @@ $(document).ready(function(){
 	// MESSAGES TO HANDLE:
 	
 	socket.on('quiz_state_changed', function(msg){
-		console.log('Quiz state changed!', msg);
 		if (msg['state'] == current_quiz_state) {
+			console.log('should not reset')
 			return;
 		}
+		console.log('Quiz state changed!', msg);
 		
 		// update any particular screens
 		if (msg['state'] == 2) { // free response section
