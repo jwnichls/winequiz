@@ -173,7 +173,7 @@ def join_quiz(id):
     """
     Show the interface to join the quiz
     """
-    competitor_id = request.cookies.get(WINE_QUIZ_COOKIE_NAME)
+    competitor_id = request.cookies.get(WINE_QUIZ_COOKIE_NAME, type=int)
     if competitor_id is not None:
         competitor = Competitor.query.filter_by(id=competitor_id).first()
         if competitor is not None and competitor.quiz_id == id:
@@ -251,7 +251,7 @@ def start_player(id):
     """
     Show the interface to join the quiz
     """
-    competitor_id = request.cookies.get(WINE_QUIZ_COOKIE_NAME)
+    competitor_id = request.cookies.get(WINE_QUIZ_COOKIE_NAME, type=int)
     if competitor_id is None:
         return redirect(url_for('quiz.join_quiz', id=id))
     
@@ -310,7 +310,7 @@ def submit_free_response(id):
     """
     Submit free response answer
     """    
-    competitor_id = request.cookies.get(WINE_QUIZ_COOKIE_NAME)
+    competitor_id = request.cookies.get(WINE_QUIZ_COOKIE_NAME, type=int)
     if competitor_id is None:
         abort(500, 'Invalid competitor')
     
@@ -333,7 +333,7 @@ def submit_multiple_choice(id):
     """
     Submit multiple choice answer
     """
-    competitor_id = request.cookies.get(WINE_QUIZ_COOKIE_NAME)
+    competitor_id = request.cookies.get(WINE_QUIZ_COOKIE_NAME, type=int)
     if competitor_id is None:
         abort(500, 'Invalid competitor')
     
@@ -355,7 +355,7 @@ def get_answer(id):
     """
     Return the values from an answer for this competitor, if one exists
     """
-    competitor_id = request.cookies.get(WINE_QUIZ_COOKIE_NAME)
+    competitor_id = request.cookies.get(WINE_QUIZ_COOKIE_NAME, type=int)
     if competitor_id is None:
         abort(500, 'Invalid competitor')
     
