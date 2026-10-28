@@ -4,19 +4,19 @@ version = "0.1.0"
 description = "A multi-user wine quiz web-based game"
 authors = [{ name = "Jeff Nichols", email = "jeff@jeffreynichols.com" }]
 readme = "README.md"
-requires-python = ">=3.9,<4.0"
+requires-python = ">=3.14"
 dependencies = [
     "flask",
     "flask-socketio",
     "flask-bootstrap",
-    "flask-sqlalchemy>=3.1.1,<4",
+    "flask-sqlalchemy",
     "sqlalchemy",
     "psycopg2-binary",
     "flask-migrate",
     "celery",
     "redis",
-    "eventlet>=0.33.3,<0.34",
-    "gunicorn>=21.2.0,<22",
+    "gunicorn",
+    "gevent>=26.9.0",
 ]
 
 [dependency-groups]
@@ -26,9 +26,9 @@ dev = [
     "pytest-cov",
     "flake8",
     "pylint",
-    "black==21.7b0",
+    "black",
     "pre-commit",
-    "curlylint",
+    "curlylint>=0.13.1",
 ]
 
 [build-system]

@@ -1,1 +1,1 @@
-web: gunicorn --worker-class eventlet -w 1 'winequiz:create_app()'
+web: gunicorn --worker-class gevent -w 1 'winequiz:create_app()'
