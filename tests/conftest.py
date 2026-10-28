@@ -32,6 +32,7 @@ def app():
         yield app
         db.session.remove()
         db.drop_all()
+        db.engine.dispose()  # each app has its own pool; close it so connections don't pile up
 
 
 @pytest.fixture
