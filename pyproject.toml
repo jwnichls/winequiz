@@ -29,6 +29,7 @@ dev = [
     "black",
     "pre-commit",
     "curlylint>=0.13.1",
+    "fakeredis>=2.40.0",
 ]
 
 [build-system]

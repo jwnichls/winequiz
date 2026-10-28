@@ -216,7 +216,7 @@ def check_player_name(id):
         abort(404, 'Quiz does not exist')
     
     if not request.is_json:
-        abort(500, 'Invalid data type')
+        abort(415, 'Expected a JSON request')
         
     json_data = request.get_json()
     proposed_name = json_data.get("name")
@@ -329,16 +329,16 @@ def submit_free_response(id):
     """    
     competitor_id = request.cookies.get(WINE_QUIZ_COOKIE_NAME, type=int)
     if competitor_id is None:
-        abort(500, 'Invalid competitor')
+        abort(403, 'Not a competitor')
     
     competitor = Competitor.query.filter_by(id=competitor_id).first()
     if competitor is None or competitor.quiz_id != id:
-        abort(500, 'Invalid competitor or quiz')
+        abort(403, 'Not a competitor in this quiz')
 
     quiz = Quiz.query.filter_by(id=id).first()
     
     if not request.is_json:
-        abort(500, 'Invalid data type')
+        abort(415, 'Expected a JSON request')
         
     if quiz.state != QuizStateEnum.FREE_RESPONSE:
         abort(409, 'Free response answers are closed')
@@ -355,16 +355,16 @@ def submit_multiple_choice(id):
     """
     competitor_id = request.cookies.get(WINE_QUIZ_COOKIE_NAME, type=int)
     if competitor_id is None:
-        abort(500, 'Invalid competitor')
+        abort(403, 'Not a competitor')
     
     competitor = Competitor.query.filter_by(id=competitor_id).first()
     if competitor is None or competitor.quiz_id != id:
-        abort(500, 'Invalid competitor or quiz')
+        abort(403, 'Not a competitor in this quiz')
 
     quiz = Quiz.query.filter_by(id=id).first()
     
     if not request.is_json:
-        abort(500, 'Invalid data type')
+        abort(415, 'Expected a JSON request')
         
     if quiz.state != QuizStateEnum.MULTIPLE_CHOICE:
         abort(409, 'Multiple choice answers are closed')
@@ -380,15 +380,15 @@ def get_answer(id):
     """
     competitor_id = request.cookies.get(WINE_QUIZ_COOKIE_NAME, type=int)
     if competitor_id is None:
-        abort(500, 'Invalid competitor')
+        abort(403, 'Not a competitor')
     
     competitor = Competitor.query.filter_by(id=competitor_id).first()
     if competitor is None or competitor.quiz_id != id:
-        abort(500, 'Invalid competitor or quiz')
+        abort(403, 'Not a competitor in this quiz')
 
     quiz = Quiz.query.filter_by(id=id).first()
     if quiz.state != QuizStateEnum.FREE_RESPONSE and quiz.state != QuizStateEnum.MULTIPLE_CHOICE:
-        abort(500, 'Answer can only be returned in an answering phase')
+        abort(409, 'Answer can only be returned in an answering phase')
 
     item = quiz.items[quiz.current_item]
     answer = Answer.query.filter_by(

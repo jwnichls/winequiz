@@ -6,10 +6,11 @@ TEST_DATABASE_URL to a PostgreSQL URL to run them against Postgres,
 which is what production uses (CI does this).
 """
 
+import fakeredis
 import pytest
 from flask import template_rendered
 
-from winequiz import create_app, socketio, websocket
+from winequiz import create_app, socketio
 from winequiz.db import db, Country, Grape, GrapeColorEnum, Quiz
 
 from tests.helpers import TEST_DATABASE_URL, make_item
@@ -27,7 +28,7 @@ def app():
         "SQLALCHEMY_DATABASE_URI": TEST_DATABASE_URL,
     })
 
-    websocket.competitor_sockets.clear()
+    app.extensions["presence_redis"] = fakeredis.FakeRedis()
 
     with app.app_context():
         db.create_all()

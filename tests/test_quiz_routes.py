@@ -97,7 +97,7 @@ def test_checkname_without_name(client, quiz):
 
 def test_checkname_requires_json(client, quiz):
     response = client.post(f"/quiz/{quiz.id}/checkname", data={"name": "Alice"})
-    assert response.status_code == 500
+    assert response.status_code == 415
 
 
 def test_create_player(client, quiz):
@@ -266,7 +266,7 @@ def test_submit_requires_competitor_cookie(client, quiz, grapes, countries, kind
     set_state(quiz, QuizStateEnum.FREE_RESPONSE)
     response = client.post(f"/quiz/{quiz.id}/{kind}", json=answer_payload(grapes, countries))
 
-    assert response.status_code == 500
+    assert response.status_code == 403
     assert Answer.query.count() == 0
 
 
@@ -278,7 +278,7 @@ def test_submit_rejects_competitor_from_another_quiz(
 
     response = client.post(f"/quiz/{quiz.id}/{kind}", json=answer_payload(grapes, countries))
 
-    assert response.status_code == 500
+    assert response.status_code == 403
     assert Answer.query.count() == 0
 
 
@@ -286,7 +286,7 @@ def test_submit_rejects_competitor_from_another_quiz(
 def test_submit_requires_json(client, quiz, alice, kind):
     set_state(quiz, QuizStateEnum.FREE_RESPONSE)
     response = client.post(f"/quiz/{quiz.id}/{kind}", data={"grape": "1"})
-    assert response.status_code == 500
+    assert response.status_code == 415
 
 
 @pytest.mark.parametrize("kind, open_state", [
@@ -349,12 +349,18 @@ def test_get_answer_returns_answer_for_current_period(client, quiz, alice, grape
 ])
 def test_get_answer_only_during_answering_periods(client, quiz, alice, state):
     set_state(quiz, state)
-    assert client.get(f"/quiz/{quiz.id}/answer").status_code == 500
+    assert client.get(f"/quiz/{quiz.id}/answer").status_code == 409
 
 
 def test_get_answer_requires_competitor_cookie(client, quiz):
     set_state(quiz, QuizStateEnum.FREE_RESPONSE)
-    assert client.get(f"/quiz/{quiz.id}/answer").status_code == 500
+    assert client.get(f"/quiz/{quiz.id}/answer").status_code == 403
+
+
+def test_get_answer_rejects_competitor_from_another_quiz(client, quiz, other_quiz):
+    set_state(quiz, QuizStateEnum.FREE_RESPONSE)
+    login_as(client, add_competitor(other_quiz, "Mallory"))
+    assert client.get(f"/quiz/{quiz.id}/answer").status_code == 403
 
 
 # Moderator

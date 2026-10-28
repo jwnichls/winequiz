@@ -14,6 +14,7 @@ from . import (
     api,
     db,
     index,
+    presence,
 )
 
 
@@ -74,6 +75,9 @@ def create_app(test_config=None, main=True):
 
     # Initialize DB Module
     db.init_db(app)
+
+    # Initialize tracking of connected competitors
+    presence.init_app(app)
 
     # Initialize Celery
     celery.init_app(app)

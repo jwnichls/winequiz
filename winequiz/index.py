@@ -83,4 +83,4 @@ def submit_new_quiz():
         return render_template("index/quiz_success.html", quiz=quiz)
         
     except ValueError:
-        abort(500, "Input value error")
+        abort(400, "Input value error")

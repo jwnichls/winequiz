@@ -113,7 +113,7 @@ def test_create_quiz_with_no_wines(client, grapes, countries):
 def test_create_quiz_rejects_bad_wine_number(client, grapes, countries):
     form = new_quiz_form(grapes, countries, wines=1, grape_x="1")
 
-    assert client.post("/new", data=form).status_code == 500
+    assert client.post("/new", data=form).status_code == 400
     assert Quiz.query.count() == 0
 
 

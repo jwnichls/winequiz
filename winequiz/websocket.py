@@ -3,21 +3,13 @@ Collection of methods that use SocketIO to keep the
 game in sync efficiently across multiple devices
 """
 
-from collections import defaultdict
-
 from flask import request, session
 from flask_socketio import emit, join_room
 
 from winequiz.db import get_db, Competitor, Quiz, QuizItem
 from winequiz.quiz import advance_quiz_state, reverse_quiz_state, get_quiz_state
 
-from . import socketio
-
-
-# The socket ids each competitor has joined with, so we can tell when their
-# last connection goes away. This is per process, which is fine as long as
-# the app runs a single worker (see Procfile).
-competitor_sockets = defaultdict(set)
+from . import presence, socketio
 
 
 @socketio.on('connect')
@@ -44,7 +36,7 @@ def on_join(data):
             
             if competitor is not None:
                 session['competitor_id'] = competitor.id
-                competitor_sockets[competitor.id].add(request.sid)
+                presence.add_socket(competitor.id, request.sid)
                 emit('competitor_joined', {'id': competitor.id, 'name': competitor.name}, room=room_name)
         else:
             print("Not allowing user to join")
@@ -86,10 +78,7 @@ def on_disconnect(reason=None):
     if competitor_id is None:
         return
 
-    sockets = competitor_sockets[competitor_id]
-    sockets.discard(request.sid)
-    if not sockets:
-        del competitor_sockets[competitor_id]
+    if presence.remove_socket(competitor_id, request.sid):
         announce_competitor_left(competitor_id)
 
 
