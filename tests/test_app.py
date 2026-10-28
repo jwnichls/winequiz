@@ -2,6 +2,9 @@
 Tests for app creation, configuration and the Celery integration
 """
 
+import ssl
+
+import redis
 from flask import Flask
 
 from winequiz import create_app, load_config_for_heroku
@@ -73,3 +76,40 @@ def test_celery_tasks_run_in_app_context_synchronously_when_testing(app):
 
     assert add.apply_async((2, 3)) == 5
     assert current_app_name.apply_async() == app.name
+
+
+def test_heroku_tls_redis_skips_certificate_verification(monkeypatch):
+    # Heroku Redis serves a self-signed certificate
+    monkeypatch.setenv("REDIS_URL", "rediss://:pw@redis.example:9780")
+    monkeypatch.setenv("DATABASE_URL", "postgres://db.example/winequiz")
+    app = Flask(__name__)
+
+    load_config_for_heroku(app)
+
+    expected = "rediss://:pw@redis.example:9780?ssl_cert_reqs=none"
+    assert app.config["BROKER_URL"] == expected
+    assert app.config["RESULT_BACKEND"] == expected
+
+
+def test_heroku_tls_redis_url_with_existing_query(monkeypatch):
+    monkeypatch.setenv("REDIS_URL", "rediss://:pw@redis.example:9780/0?socket_timeout=5")
+    monkeypatch.setenv("DATABASE_URL", "postgres://db.example/winequiz")
+    app = Flask(__name__)
+
+    load_config_for_heroku(app)
+
+    assert app.config["BROKER_URL"] == (
+        "rediss://:pw@redis.example:9780/0?socket_timeout=5&ssl_cert_reqs=none"
+    )
+
+
+def test_tls_redis_url_creates_unverified_ssl_connection(monkeypatch):
+    monkeypatch.setenv("REDIS_URL", "rediss://:pw@redis.example:9780")
+    monkeypatch.setenv("DATABASE_URL", "postgres://db.example/winequiz")
+    app = Flask(__name__)
+    load_config_for_heroku(app)
+
+    connection = redis.Redis.from_url(app.config["BROKER_URL"]).connection_pool.make_connection()
+
+    assert isinstance(connection, redis.SSLConnection)
+    assert connection.cert_reqs == ssl.CERT_NONE

@@ -28,8 +28,13 @@ def load_config_for_heroku(app):
     """
     Load the configuration from Heroku environment variables
     """
-    app.config['BROKER_URL'] = os.getenv('REDIS_URL')
-    app.config['RESULT_BACKEND'] = os.getenv('REDIS_URL')
+    redis_url = os.getenv('REDIS_URL')
+    if redis_url is not None and redis_url.startswith('rediss://'):
+        # Heroku Redis uses self-signed certificates, so the TLS connection
+        # can't verify them (see Heroku's Redis docs)
+        redis_url += ('&' if '?' in redis_url else '?') + 'ssl_cert_reqs=none'
+    app.config['BROKER_URL'] = redis_url
+    app.config['RESULT_BACKEND'] = redis_url
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
         'DATABASE_URL'
