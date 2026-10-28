@@ -30,6 +30,7 @@ dev = [
     "pre-commit",
     "curlylint>=0.13.1",
     "fakeredis>=2.40.0",
+    "pytest-playwright>=0.10.0",
 ]
 
 [build-system]
@@ -39,3 +40,7 @@ build-backend = "hatchling.build"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 xfail_strict = true
+# The browser tests in tests/e2e need Chromium and a live server; run them
+# with `pytest -m e2e`
+addopts = ["-m", "not e2e"]
+markers = ["e2e: end-to-end browser tests (run with -m e2e)"]

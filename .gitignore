@@ -143,3 +143,6 @@ staging-secret-config.py
 staging-server-config.py
 sample_token_config.py
 .zshrc
+
+# Playwright output
+test-results/
