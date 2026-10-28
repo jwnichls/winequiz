@@ -1,40 +1,36 @@
-[tool.poetry]
+[project]
 name = "winequiz"
 version = "0.1.0"
 description = "A multi-user wine quiz web-based game"
-authors = ["Jeff Nichols <jeff@jeffreynichols.com>"]
+authors = [{ name = "Jeff Nichols", email = "jeff@jeffreynichols.com" }]
 readme = "README.md"
+requires-python = ">=3.9,<4.0"
+dependencies = [
+    "flask",
+    "flask-socketio",
+    "flask-bootstrap",
+    "flask-sqlalchemy>=3.1.1,<4",
+    "sqlalchemy",
+    "psycopg2-binary",
+    "flask-migrate",
+    "celery",
+    "redis",
+    "eventlet>=0.33.3,<0.34",
+    "gunicorn>=21.2.0,<22",
+]
 
-
-[tool.poetry.dependencies]
-python = "^3.9"
-flask = "*"
-flask-socketio = "*"
-flask-bootstrap = "*"
-flask-sqlalchemy = "^3.1.1"
-sqlalchemy = "*"
-psycopg2 = "*"
-psycopg2-binary = "*"
-flask-migrate = "*"
-celery = "*"
-redis = "*"
-pytest = "*"
-coverage = "*"
-pytest-cov = "*"
-flake8 = "*"
-pylint = "*"
-black = "==21.7b0"
-pre-commit = "*"
-curlylint = "*"
-eventlet = "^0.33.3"
-gunicorn = "^21.2.0"
-
-
-[[tool.poetry.source]]
-name = "PyPI"
-priority = "primary"
-
+[dependency-groups]
+dev = [
+    "pytest",
+    "coverage",
+    "pytest-cov",
+    "flake8",
+    "pylint",
+    "black==21.7b0",
+    "pre-commit",
+    "curlylint",
+]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
