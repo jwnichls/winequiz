@@ -416,7 +416,7 @@ def test_rescore(client, quiz, grapes, countries):
     alice = add_competitor(quiz, "Alice")
     add_answer(alice, quiz.items[0], grapes["Merlot"], countries["France"], None)
 
-    response = client.get(f"/quiz/{quiz.id}/rescore")
+    response = client.get(f"/quiz/{quiz.id}/rescore?modcode=secret-mod")
 
     assert response.status_code == 302
     assert response.location == f"/quiz/{quiz.id}/leaderboard"
@@ -432,7 +432,7 @@ def test_merge_competitors(client, quiz, grapes, countries):
     add_answer(alice_again, item2, grapes["Chardonnay"], countries["Chile"], 2020)
     alice_id, dup_id = alice.id, alice_again.id
 
-    response = client.get(f"/quiz/{quiz.id}/merge/{dup_id}/to/{alice_id}")
+    response = client.get(f"/quiz/{quiz.id}/merge/{dup_id}/to/{alice_id}?modcode=secret-mod")
 
     assert response.status_code == 302
     assert response.location == f"/quiz/{quiz.id}/leaderboard"
@@ -440,7 +440,7 @@ def test_merge_competitors(client, quiz, grapes, countries):
     assert db.session.get(Competitor, dup_id) is None
     assert {a.competitor_id for a in Answer.query.all()} == {alice_id}
 
-    client.get(f"/quiz/{quiz.id}/rescore")
+    client.get(f"/quiz/{quiz.id}/rescore?modcode=secret-mod")
     db.session.expire_all()
     assert db.session.get(Competitor, alice_id).points == 60
 
@@ -449,8 +449,9 @@ def test_merge_rejects_competitors_from_another_quiz(client, quiz, other_quiz):
     alice = add_competitor(quiz, "Alice")
     mallory = add_competitor(other_quiz, "Mallory")
 
-    assert client.get(f"/quiz/{quiz.id}/merge/{mallory.id}/to/{alice.id}").status_code == 404
-    assert client.get(f"/quiz/{quiz.id}/merge/{alice.id}/to/{mallory.id}").status_code == 404
+    merge = f"/quiz/{quiz.id}/merge/{{}}/to/{{}}?modcode=secret-mod"
+    assert client.get(merge.format(mallory.id, alice.id)).status_code == 404
+    assert client.get(merge.format(alice.id, mallory.id)).status_code == 404
     assert Competitor.query.count() == 2
 
 
@@ -458,7 +459,7 @@ def test_merge_competitor_into_itself_is_rejected(client, quiz, grapes, countrie
     alice = add_competitor(quiz, "Alice")
     add_answer(alice, quiz.items[0], grapes["Merlot"], countries["France"], 2015)
 
-    response = client.get(f"/quiz/{quiz.id}/merge/{alice.id}/to/{alice.id}")
+    response = client.get(f"/quiz/{quiz.id}/merge/{alice.id}/to/{alice.id}?modcode=secret-mod")
 
     assert response.status_code == 400
     assert Competitor.query.count() == 1
@@ -466,15 +467,44 @@ def test_merge_competitor_into_itself_is_rejected(client, quiz, grapes, countrie
 
 
 @pytest.mark.parametrize("path", [
-    "/quiz/9999/merge/1/to/2",
-    "/quiz/{quiz}/merge/9999/to/{alice}",
-    "/quiz/{quiz}/merge/{alice}/to/9999",
+    "/quiz/9999/merge/1/to/2?modcode=secret-mod",
+    "/quiz/{quiz}/merge/9999/to/{alice}?modcode=secret-mod",
+    "/quiz/{quiz}/merge/{alice}/to/9999?modcode=secret-mod",
 ])
 def test_merge_competitors_not_found(client, quiz, path):
     alice = add_competitor(quiz, "Alice")
     url = path.format(quiz=quiz.id, alice=alice.id)
     assert client.get(url).status_code == 404
     assert Competitor.query.count() == 1
+
+
+@pytest.mark.parametrize("query", ["", "?modcode=wrong", "?modcode=other-mod"])
+def test_rescore_requires_moderator_code(client, quiz, other_quiz, grapes, countries, query):
+    alice = add_competitor(quiz, "Alice")
+    add_answer(alice, quiz.items[0], grapes["Merlot"], countries["France"], 2015)
+
+    response = client.get(f"/quiz/{quiz.id}/rescore{query}")
+
+    assert response.status_code == 401
+    db.session.expire_all()
+    assert db.session.get(Competitor, alice.id).points == 0
+
+
+@pytest.mark.parametrize("query", ["", "?modcode=wrong", "?modcode=other-mod"])
+def test_merge_requires_moderator_code(client, quiz, other_quiz, grapes, countries, query):
+    alice = add_competitor(quiz, "Alice")
+    alice_again = add_competitor(quiz, "Alice 2")
+    add_answer(alice_again, quiz.items[0], grapes["Merlot"], countries["France"], 2015)
+
+    response = client.get(f"/quiz/{quiz.id}/merge/{alice_again.id}/to/{alice.id}{query}")
+
+    assert response.status_code == 401
+    assert Competitor.query.count() == 2
+    assert Answer.query.one().competitor_id == alice_again.id
+
+
+def test_merge_without_code_does_not_reveal_competitors(client, quiz):
+    assert client.get(f"/quiz/{quiz.id}/merge/9998/to/9999").status_code == 401
 
 
 def test_breakdown(client, templates, quiz, grapes, countries):

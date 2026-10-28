@@ -415,17 +415,25 @@ def join_as_moderator(id):
     return render_template("quiz/join_as_mod.html", quiz=quiz)
 
 
+def check_moderator_code(quiz):
+    """
+    Aborts unless the request carries the quiz's moderator code, either in
+    a moderator_code form field or a modcode query parameter
+    """
+    supplied_code = request.form.get('moderator_code', request.args.get('modcode'))
+    if supplied_code is None or quiz.moderator_code != supplied_code:
+        abort(401, 'Unauthorized')
+
+
 @bp.route("/<int:id>/moderator", methods=["GET", "POST"])
 def start_moderator(id):
     """
     Show the screen to display moderator interface
     """
-    supplied_code = request.form.get('moderator_code', request.args.get('modcode'))
     quiz = Quiz.query.filter_by(id=id).first()
     if quiz is None:
         abort(404, 'Quiz does not exist')
-    if supplied_code is None or quiz.moderator_code != supplied_code:
-        abort(401, 'Unauthorized')
+    check_moderator_code(quiz)
     
     return render_template("quiz/moderator.html", quiz=quiz)
 
@@ -447,16 +455,21 @@ def show_leaderboard(id):
 @bp.route("/<int:id>/merge/<int:c_dup_id>/to/<int:c_main_id>", methods=["GET"])
 def merge_competitors(id, c_dup_id, c_main_id):
     """
-    Show the leaderboard
+    Merge a duplicate competitor's answers into another competitor and
+    remove the duplicate (moderator only)
     """
     db = get_db()
     
     quiz = Quiz.query.filter_by(id=id).first()
+    if quiz is None:
+        abort(404, 'Quiz does not exist')
+    check_moderator_code(quiz)
+
     main_competitor = Competitor.query.filter_by(id=c_main_id).first()
     merging_competitor = Competitor.query.filter_by(id=c_dup_id).first()
     
-    if quiz is None or main_competitor is None or merging_competitor is None:
-        abort(404, 'Quiz or competitors do not exist')
+    if main_competitor is None or merging_competitor is None:
+        abort(404, 'Competitors do not exist')
     if main_competitor.quiz_id != quiz.id or merging_competitor.quiz_id != quiz.id:
         abort(404, 'Competitors are not in this quiz')
     if main_competitor.id == merging_competitor.id:
@@ -476,11 +489,12 @@ def merge_competitors(id, c_dup_id, c_main_id):
 @bp.route("/<int:id>/rescore", methods=["GET"])
 def rescore(id):
     """
-    Rescore the quiz
+    Rescore the quiz (moderator only)
     """
     quiz = Quiz.query.filter_by(id=id).first()
     if quiz is None:
         abort(404, 'No such quiz')
+    check_moderator_code(quiz)
         
     calculate_total_points(quiz)
     
