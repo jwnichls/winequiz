@@ -9,7 +9,7 @@ which is what production uses (CI does this).
 import pytest
 from flask import template_rendered
 
-from winequiz import create_app, socketio
+from winequiz import create_app, socketio, websocket
 from winequiz.db import db, Country, Grape, GrapeColorEnum, Quiz
 
 from tests.helpers import TEST_DATABASE_URL, make_item
@@ -26,6 +26,8 @@ def app():
         "BROKER_URL": None,
         "SQLALCHEMY_DATABASE_URI": TEST_DATABASE_URL,
     })
+
+    websocket.competitor_sockets.clear()
 
     with app.app_context():
         db.create_all()

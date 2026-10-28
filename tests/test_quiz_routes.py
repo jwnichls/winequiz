@@ -289,22 +289,35 @@ def test_submit_requires_json(client, quiz, alice, kind):
     assert response.status_code == 500
 
 
-@pytest.mark.xfail(strict=True,
-                   reason="Known bug: answers are accepted after the answering period, "
-                          "so a player can change answers once the correct ones are shown")
-@pytest.mark.parametrize("state, kind", [
-    (QuizStateEnum.MULTIPLE_CHOICE, "submit_free_response"),
-    (QuizStateEnum.QUESTION_RECAP, "submit_free_response"),
-    (QuizStateEnum.QUESTION_RECAP, "submit_multiple_choice"),
+@pytest.mark.parametrize("kind, open_state", [
+    ("submit_free_response", QuizStateEnum.FREE_RESPONSE),
+    ("submit_multiple_choice", QuizStateEnum.MULTIPLE_CHOICE),
 ])
+@pytest.mark.parametrize("state", list(QuizStateEnum))
 def test_submit_rejected_outside_its_answering_period(
-        client, quiz, alice, grapes, countries, state, kind):
-    set_state(quiz, state)
+        client, quiz, alice, grapes, countries, kind, open_state, state):
+    if state == open_state:
+        pytest.skip("answers are open in this state")
+    set_state(quiz, state, current_item=2 if state == QuizStateEnum.QUIZ_RECAP else 0)
 
     response = client.post(f"/quiz/{quiz.id}/{kind}", json=answer_payload(grapes, countries))
 
-    assert response.status_code >= 400
+    assert response.status_code == 409
     assert Answer.query.count() == 0
+
+
+def test_answer_cannot_be_changed_after_correct_answer_is_shown(
+        client, quiz, alice, grapes, countries):
+    set_state(quiz, QuizStateEnum.FREE_RESPONSE)
+    client.post(f"/quiz/{quiz.id}/submit_free_response",
+                json=answer_payload(grapes, countries, "Syrah", "Italy", 2012))
+    set_state(quiz, QuizStateEnum.QUESTION_RECAP)
+
+    client.post(f"/quiz/{quiz.id}/submit_free_response",
+                json=answer_payload(grapes, countries, "Merlot", "France", 2015))
+
+    answer = Answer.query.one()
+    assert (answer.grape_id, answer.vintage) == (grapes["Syrah"].id, 2012)
 
 
 def test_get_answer_when_none_submitted(client, quiz, alice):
@@ -426,6 +439,26 @@ def test_merge_competitors(client, quiz, grapes, countries):
     assert db.session.get(Competitor, alice_id).points == 60
 
 
+def test_merge_rejects_competitors_from_another_quiz(client, quiz, other_quiz):
+    alice = add_competitor(quiz, "Alice")
+    mallory = add_competitor(other_quiz, "Mallory")
+
+    assert client.get(f"/quiz/{quiz.id}/merge/{mallory.id}/to/{alice.id}").status_code == 404
+    assert client.get(f"/quiz/{quiz.id}/merge/{alice.id}/to/{mallory.id}").status_code == 404
+    assert Competitor.query.count() == 2
+
+
+def test_merge_competitor_into_itself_is_rejected(client, quiz, grapes, countries):
+    alice = add_competitor(quiz, "Alice")
+    add_answer(alice, quiz.items[0], grapes["Merlot"], countries["France"], 2015)
+
+    response = client.get(f"/quiz/{quiz.id}/merge/{alice.id}/to/{alice.id}")
+
+    assert response.status_code == 400
+    assert Competitor.query.count() == 1
+    assert Answer.query.count() == 1
+
+
 @pytest.mark.parametrize("path", [
     "/quiz/9999/merge/1/to/2",
     "/quiz/{quiz}/merge/9999/to/{alice}",
@@ -531,9 +564,6 @@ def test_missing_quiz_is_404(client, path):
     assert client.get(f"/quiz/9999/{path}").status_code == 404
 
 
-@pytest.mark.xfail(strict=True,
-                   reason="Known bug: these pages don't check that the quiz exists and "
-                          "crash (500) or render an empty page instead of returning 404")
 @pytest.mark.parametrize("method, path", [
     ("get", ""),
     ("get", "/join"),
@@ -543,8 +573,7 @@ def test_missing_quiz_is_404(client, path):
     ("post", "/checkname"),
     ("post", "/createplayer"),
 ])
-def test_pages_for_missing_quiz_are_404(app, client, method, path):
-    app.config["PROPAGATE_EXCEPTIONS"] = False  # see the 500 a browser would get
+def test_pages_for_missing_quiz_are_404(client, method, path):
     response = getattr(client, method)(f"/quiz/9999{path}", json={"name": "Z"})
     assert response.status_code == 404
 

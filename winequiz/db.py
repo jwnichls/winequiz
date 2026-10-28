@@ -170,6 +170,8 @@ class QuizItem(db.Model):
     vintage_alternate_one = db.Column(db.Integer, nullable=False)
     vintage_alternate_two = db.Column(db.Integer, nullable=False)
     vintage_alternate_three = db.Column(db.Integer, nullable=False)
+    grape = db.relationship("Grape", foreign_keys=[grape_id])
+    country = db.relationship("Country", foreign_keys=[country_id])
 
     def __repr__(self):
         """
@@ -221,6 +223,8 @@ class Answer(db.Model):
     grape_id = db.Column(db.Integer, db.ForeignKey("grape.id"), nullable=True)
     country_id = db.Column(db.Integer, db.ForeignKey("country.id"), nullable=True)
     vintage = db.Column(db.Integer, nullable=True)
+    quiz = db.relationship("Quiz")
+    quiz_item = db.relationship("QuizItem")
 
     def __repr__(self):
         """

@@ -50,8 +50,11 @@ def advance_quiz_state(quiz):
     if quiz.state == QuizStateEnum.NOT_STARTED:
         quiz.state = QuizStateEnum.LOBBY_OPEN
     elif quiz.state == QuizStateEnum.LOBBY_OPEN:
-        quiz.state = QuizStateEnum.FREE_RESPONSE
         quiz.current_item = 0
+        if len(quiz.items) == 0:
+            quiz.state = QuizStateEnum.QUIZ_RECAP
+        else:
+            quiz.state = QuizStateEnum.FREE_RESPONSE
     elif quiz.state == QuizStateEnum.FREE_RESPONSE:
         quiz.state = QuizStateEnum.MULTIPLE_CHOICE
     elif quiz.state == QuizStateEnum.MULTIPLE_CHOICE:
@@ -100,8 +103,12 @@ def reverse_quiz_state(quiz):
     elif quiz.state == QuizStateEnum.QUESTION_RECAP:
         quiz.state = QuizStateEnum.MULTIPLE_CHOICE
     elif quiz.state == QuizStateEnum.QUIZ_RECAP:
-        quiz.state = QuizStateEnum.QUESTION_RECAP
-        quiz.current_item = len(quiz.items)-1
+        if len(quiz.items) == 0:
+            quiz.state = QuizStateEnum.LOBBY_OPEN
+            quiz.current_item = 0
+        else:
+            quiz.state = QuizStateEnum.QUESTION_RECAP
+            quiz.current_item = len(quiz.items)-1
 
     db.session.add(quiz)
     db.session.commit()
@@ -164,6 +171,8 @@ def show_quiz(id):
     Show basic quiz data
     """
     quiz = Quiz.query.filter_by(id=id).first()
+    if quiz is None:
+        abort(404, 'Quiz does not exist')
     
     return render_template("quiz/index.html", quiz=quiz)
 
@@ -180,6 +189,8 @@ def join_quiz(id):
             return redirect(url_for('quiz.start_player', id=id))
     
     quiz = Quiz.query.filter_by(id=id).first()
+    if quiz is None:
+        abort(404, 'Quiz does not exist')
     
     return render_template("quiz/join.html", quiz=quiz)
 
@@ -201,6 +212,8 @@ def check_player_name(id):
     Check whether a name is in use
     """
     quiz = Quiz.query.filter_by(id=id).first()
+    if quiz is None:
+        abort(404, 'Quiz does not exist')
     
     if not request.is_json:
         abort(500, 'Invalid data type')
@@ -219,6 +232,8 @@ def create_player(id):
     db = get_db()
     
     quiz = Quiz.query.filter_by(id=id).first()
+    if quiz is None:
+        abort(404, 'Quiz does not exist')
     proposed_name = request.form.get("competitor_name")
 
     if not check_name(quiz, proposed_name):
@@ -242,6 +257,8 @@ def start_display(id):
     Show the large display interface for a quiz
     """
     quiz = Quiz.query.filter_by(id=id).first()    
+    if quiz is None:
+        abort(404, 'Quiz does not exist')
     
     return render_template("quiz/display.html", quiz=quiz)
 
@@ -323,6 +340,9 @@ def submit_free_response(id):
     if not request.is_json:
         abort(500, 'Invalid data type')
         
+    if quiz.state != QuizStateEnum.FREE_RESPONSE:
+        abort(409, 'Free response answers are closed')
+
     json_data = request.get_json()
     return submit_answer(competitor, quiz, json_data, free_response=True)
     
@@ -346,6 +366,9 @@ def submit_multiple_choice(id):
     if not request.is_json:
         abort(500, 'Invalid data type')
         
+    if quiz.state != QuizStateEnum.MULTIPLE_CHOICE:
+        abort(409, 'Multiple choice answers are closed')
+
     json_data = request.get_json()
     return submit_answer(competitor, quiz, json_data, free_response=False)
 
@@ -387,6 +410,8 @@ def join_as_moderator(id):
     Display the page that allows joining as a moderator
     """
     quiz = Quiz.query.filter_by(id=id).first()
+    if quiz is None:
+        abort(404, 'Quiz does not exist')
     return render_template("quiz/join_as_mod.html", quiz=quiz)
 
 
@@ -397,6 +422,8 @@ def start_moderator(id):
     """
     supplied_code = request.form.get('moderator_code', request.args.get('modcode'))
     quiz = Quiz.query.filter_by(id=id).first()
+    if quiz is None:
+        abort(404, 'Quiz does not exist')
     if supplied_code is None or quiz.moderator_code != supplied_code:
         abort(401, 'Unauthorized')
     
@@ -430,6 +457,10 @@ def merge_competitors(id, c_dup_id, c_main_id):
     
     if quiz is None or main_competitor is None or merging_competitor is None:
         abort(404, 'Quiz or competitors do not exist')
+    if main_competitor.quiz_id != quiz.id or merging_competitor.quiz_id != quiz.id:
+        abort(404, 'Competitors are not in this quiz')
+    if main_competitor.id == merging_competitor.id:
+        abort(400, 'Cannot merge a competitor into itself')
     
     answers_to_merge = Answer.query.filter_by(competitor_id=c_dup_id).all()
     for answer in answers_to_merge:

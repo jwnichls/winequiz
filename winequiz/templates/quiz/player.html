@@ -463,11 +463,9 @@ $(document).ready(function(){
 		});
 	});
 
+	// The server announces competitor_left when this socket disconnects
 	socket.on('disconnect', function (data) {
 		console.log('disconnecting');
-		socket.emit('competitor_left', {
-			competitor_id: competitorId
-		}, room=quizRoomName);
 	});
 
 

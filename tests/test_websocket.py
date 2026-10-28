@@ -256,10 +256,7 @@ def test_competitor_left_for_unknown_competitor_is_ignored(socket_client, quiz):
     assert socket_client.get_received() == []
 
 
-@pytest.mark.xfail(strict=True, raises=TypeError,
-                   reason="Known bug: player.html sends the room as a second argument, "
-                          "which the competitor_left handler does not accept")
-def test_competitor_left_as_sent_by_player_page(app, client, socket_client, quiz):
+def test_competitor_left_as_sent_by_older_player_pages(app, client, socket_client, quiz):
     alice = add_competitor(quiz, "Alice")
     join(socket_client, quiz)
     player = socketio.test_client(app, flask_test_client=client)
@@ -269,3 +266,62 @@ def test_competitor_left_as_sent_by_player_page(app, client, socket_client, quiz
     assert events_named(socket_client.get_received(), "competitor_left") == [
         {"id": alice.id, "name": "Alice"}
     ]
+
+
+def test_competitor_disconnect_is_announced(app, client, socket_client, quiz):
+    alice = add_competitor(quiz, "Alice")
+    join(socket_client, quiz)
+    player = socketio.test_client(app, flask_test_client=client)
+    join(player, quiz, alice.id)
+    socket_client.get_received()
+
+    player.disconnect()
+
+    assert events_named(socket_client.get_received(), "competitor_left") == [
+        {"id": alice.id, "name": "Alice"}
+    ]
+
+
+def test_competitor_with_another_connection_is_not_announced_as_left(
+        app, client, socket_client, quiz):
+    alice = add_competitor(quiz, "Alice")
+    join(socket_client, quiz)
+    old_tab = socketio.test_client(app, flask_test_client=client)
+    new_tab = socketio.test_client(app, flask_test_client=client)
+    join(old_tab, quiz, alice.id)
+    join(new_tab, quiz, alice.id)
+    socket_client.get_received()
+
+    old_tab.disconnect()
+    assert events_named(socket_client.get_received(), "competitor_left") == []
+
+    new_tab.disconnect()
+    assert events_named(socket_client.get_received(), "competitor_left") == [
+        {"id": alice.id, "name": "Alice"}
+    ]
+
+
+def test_moderator_disconnect_is_not_announced(app, client, socket_client, quiz):
+    join(socket_client, quiz)
+    moderator = socketio.test_client(app, flask_test_client=client)
+    join(moderator, quiz)
+    socket_client.get_received()
+
+    moderator.disconnect()
+
+    assert socket_client.get_received() == []
+
+
+def test_quiz_with_no_wines_goes_from_lobby_to_recap(socket_client, quiz):
+    empty = Quiz(name="Empty", moderator_code="secret-mod", state=QuizStateEnum.LOBBY_OPEN)
+    db.session.add(empty)
+    db.session.commit()
+    join(socket_client, empty)
+
+    [event] = advance(socket_client, empty)
+    assert event["state"] == QuizStateEnum.QUIZ_RECAP
+    assert event["final_scores"] == []
+
+    [event] = reverse(socket_client, empty)
+    assert event["state"] == QuizStateEnum.LOBBY_OPEN
+    assert (reload(empty).state, reload(empty).current_item) == (QuizStateEnum.LOBBY_OPEN, 0)

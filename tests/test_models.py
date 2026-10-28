@@ -2,8 +2,6 @@
 Tests for the database models in winequiz.db
 """
 
-import pytest
-
 from winequiz.db import (
     db,
     get_db,
@@ -106,15 +104,15 @@ def test_quiz_items_are_ordered(quiz):
     assert [item.id for item in reloaded.items] == [item2.id, item1.id]
 
 
-def test_quiz_item_relationship_and_dict(quiz):
+def test_quiz_item_relationship_and_dict(quiz, grapes, countries):
     item = quiz.items[0]
 
     assert item.quiz is quiz
+    assert item.grape is grapes["Merlot"]
+    assert item.country is countries["France"]
     assert item.as_dict()["vintage"] == 2015
 
 
-@pytest.mark.xfail(strict=True, raises=AttributeError,
-                   reason="Known bug: QuizItem has no grape/country relationships for __repr__")
 def test_quiz_item_repr(quiz):
     item = quiz.items[0]
     assert repr(item) == (
@@ -150,10 +148,10 @@ def test_answer_allows_partial_responses(quiz, grapes):
     assert stored.grape_id == grapes["Merlot"].id
     assert stored.country_id is None
     assert stored.vintage is None
+    assert stored.quiz is quiz
+    assert stored.quiz_item is item
 
 
-@pytest.mark.xfail(strict=True, raises=AttributeError,
-                   reason="Known bug: Answer has no quiz/quiz_item relationships for __repr__")
 def test_answer_repr(quiz, grapes):
     alice = add_competitor(quiz, "Alice")
     item = quiz.items[0]
