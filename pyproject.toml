@@ -11,12 +11,12 @@ dependencies = [
     "flask-bootstrap",
     "flask-sqlalchemy",
     "sqlalchemy",
-    "psycopg2-binary",
     "flask-migrate",
     "celery",
     "redis",
     "gunicorn",
     "gevent>=26.9.0",
+    "psycopg[binary]>=3.3.6",
 ]
 
 [dependency-groups]
