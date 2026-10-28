@@ -53,6 +53,7 @@ class IntEnum(types.TypeDecorator):
 
     impl = Integer
     python_type = None
+    cache_ok = True
 
     def __init__(self, enumtype, *args, **kwargs):
         super().__init__(*args, **kwargs)
